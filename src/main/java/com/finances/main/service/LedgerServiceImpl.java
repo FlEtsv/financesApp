@@ -9,11 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementación del servicio de libro mayor.
  */
 @Service
+@Transactional(readOnly = true)
 public class LedgerServiceImpl implements LedgerService {
     private final TransactionRepository transactionRepository;
 
@@ -45,3 +47,5 @@ public class LedgerServiceImpl implements LedgerService {
         return transactionRepository.findByAccountAndDateRange(accountId, startDate, endDate);
     }
 }
+
+(fix) commit "resolve conflict"

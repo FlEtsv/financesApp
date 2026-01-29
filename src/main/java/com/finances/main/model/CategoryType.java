@@ -7,3 +7,4 @@ public enum CategoryType {
     INGRESO,
     GASTO
 }
+(fix) commit "resolve conflict"
