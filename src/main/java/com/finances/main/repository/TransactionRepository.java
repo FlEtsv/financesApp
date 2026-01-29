@@ -24,6 +24,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("""
         select t
         from Transaction t
+        join fetch t.category category
         where t.account.id = :accountId
           and t.transactionDate between :startDate and :endDate
         order by t.transactionDate asc
@@ -69,6 +70,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("""
         select t
         from Transaction t
+        join fetch t.category category
         where lower(t.account.name) = lower(:accountName)
           and t.transactionDate between :startDate and :endDate
         order by t.transactionDate asc
