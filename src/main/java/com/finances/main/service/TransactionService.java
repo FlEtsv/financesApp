@@ -7,6 +7,9 @@ import com.finances.main.model.Transaction;
 import com.finances.main.repository.TransactionRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,4 +49,22 @@ public class TransactionService {
         Transaction transaction = new Transaction(account, category, amount, transactionDate, description);
         return transactionRepository.save(transaction);
     }
+
+
+        @Transactional
+        public void deleteTransactionById(Long transactionId) {
+            if (transactionId == null) {
+                throw new IllegalArgumentException("transactionId no puede ser null");
+            }
+
+            if (!transactionRepository.existsById(transactionId)) {
+                throw new NoSuchElementException("No existe la transacción con id=" + transactionId);
+            }
+
+            transactionRepository.deleteById(transactionId);
+        }
+    }
+
 }
+
+

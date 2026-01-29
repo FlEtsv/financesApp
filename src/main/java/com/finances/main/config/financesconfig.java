@@ -1,4 +1,4 @@
-package com.finances.main.services;
+package com.finances.main.config;
 
 public class financesconfig {
 

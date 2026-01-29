@@ -3,6 +3,7 @@ package com.finances.main.web;
 import com.finances.main.model.CategoryType;
 import com.finances.main.model.Transaction;
 import com.finances.main.service.LedgerService;
+import com.finances.main.service.TransactionService;
 import com.finances.main.web.dto.LedgerResponses.BalanceByNameResponse;
 import com.finances.main.web.dto.LedgerResponses.BalanceResponse;
 import com.finances.main.web.dto.LedgerResponses.CategoryTotalsByNameResponse;
@@ -16,11 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * API REST para exponer datos del libro mayor a clientes web.
@@ -29,9 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/ledger")
 public class LedgerController {
     private final LedgerService ledgerService;
+    private final TransactionService transactionService;
 
-    public LedgerController(LedgerService ledgerService) {
+    public LedgerController(LedgerService ledgerService, TransactionService transactionService) {
         this.ledgerService = ledgerService;
+        this.transactionService = transactionService;
     }
 
     /**
@@ -118,4 +118,11 @@ public class LedgerController {
             transaction.getCategory().getType()
         );
     }
+
+    @DeleteMapping("/delete/transaction/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
+        transactionService.deleteTransactionById(id);
+        return ResponseEntity.noContent().build();
+    }
 }
+
