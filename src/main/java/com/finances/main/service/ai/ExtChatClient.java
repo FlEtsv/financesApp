@@ -17,7 +17,7 @@ public class ExtChatClient {
     private final AiProperties aiProperties;
     private final AiChatService fallbackService;
 
-    public ExtChatClient(AiProperties aiProperties, AiChatService fallbackService, RestClient.Builder restClientBuilder) {
+    public ExtChatClient(AiProperties aiProperties, AiChatService fallbackService, RestClient.Builder restClientBuilder ) {
         this.aiProperties = aiProperties;
         this.fallbackService = fallbackService;
         this.restClient = restClientBuilder.build();
