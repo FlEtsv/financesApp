@@ -1,6 +1,8 @@
 package com.finances.main.web;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,7 +11,13 @@ import com.finances.main.model.Account;
 import com.finances.main.model.Category;
 import com.finances.main.model.CategoryType;
 import com.finances.main.model.Transaction;
+import com.finances.main.service.AccountService;
+import com.finances.main.service.BudgetService;
+import com.finances.main.service.FinancialGoalService;
 import com.finances.main.service.LedgerService;
+import com.finances.main.service.PlannedMovementService;
+import com.finances.main.service.TransactionService;
+import com.finances.main.service.ai.ExtChatClient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,6 +38,24 @@ class AppApiControllerTest {
 
     @MockBean
     private LedgerService ledgerService;
+
+    @MockBean
+    private AccountService accountService;
+
+    @MockBean
+    private PlannedMovementService plannedMovementService;
+
+    @MockBean
+    private TransactionService transactionService;
+
+    @MockBean
+    private FinancialGoalService financialGoalService;
+
+    @MockBean
+    private BudgetService budgetService;
+
+    @MockBean
+    private ExtChatClient extChatClient;
 
     @Test
     void returnsBalanceForApp() throws Exception {
@@ -75,5 +101,13 @@ class AppApiControllerTest {
             .andExpect(jsonPath("$.transactions[0].amount").value(99.99))
             .andExpect(jsonPath("$.transactions[0].categoryName").value("Servicios"))
             .andExpect(jsonPath("$.transactions[0].categoryType").value("EXPENSE"));
+    }
+
+    @Test
+    void deletesTransactionFromApp() throws Exception {
+        mockMvc.perform(delete("/app/api/transactions/44"))
+            .andExpect(status().isNoContent());
+
+        verify(transactionService).deleteTransactionById(44L);
     }
 }

@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finances App · Ingresos y gastos</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      --primary: #1f3a8a;
+      --primary-soft: #e0e7ff;
+      --bg: #f3f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      padding: 28px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: #dbeafe;
+    }
+
+    .nav-link {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-decoration: none;
+    }
+
+    main {
+      padding: 32px 36px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .grid-form {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button.danger {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button.danger:disabled,
+    button.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 12px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions-cell {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Ingresos y gastos</h1>
+      <p class="subtitle">Registra movimientos reales y confirma pagos.</p>
+    </div>
+    <div class="actions">
+      <a class="nav-link" href="/app/index.html">Dashboard</a>
+      <a class="nav-link" href="/app/objetivos.html">Objetivos financieros</a>
+      <a class="nav-link" href="/app/fijos.html">Gastos/ingresos fijos</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Nuevo movimiento</h2>
+      <p class="muted">Utiliza esta sección para confirmar ingresos y gastos reales.</p>
+      <div class="grid-form">
+        <div>
+          <label for="accountSelect">Cuenta</label>
+          <select id="accountSelect"></select>
+        </div>
+        <div>
+          <label for="categoryType">Tipo</label>
+          <select id="categoryType">
+            <option value="INGRESO">Ingreso</option>
+            <option value="GASTO">Gasto</option>
+          </select>
+        </div>
+        <div>
+          <label for="categoryName">Categoría</label>
+          <input id="categoryName" type="text" placeholder="Ej: Nómina / Alquiler" />
+        </div>
+        <div>
+          <label for="amount">Importe</label>
+          <input id="amount" type="number" step="0.01" />
+        </div>
+        <div>
+          <label for="transactionDate">Fecha</label>
+          <input id="transactionDate" type="date" />
+        </div>
+        <div>
+          <label for="goalSelect">Objetivo asociado</label>
+          <select id="goalSelect">
+            <option value="">Sin objetivo</option>
+          </select>
+        </div>
+        <div>
+          <label for="description">Descripción</label>
+          <textarea id="description" rows="2" placeholder="Detalle del movimiento"></textarea>
+        </div>
+        <div style="align-self: end;">
+          <button id="saveTransaction" class="primary">Registrar</button>
+        </div>
+      </div>
+      <p class="muted" id="transactionStatus">Sin movimientos recientes.</p>
+    </section>
+
+    <section class="card">
+      <h2>Movimientos recientes</h2>
+      <p class="muted">Listado del periodo actual para confirmar cobros y pagos.</p>
+      <table aria-label="Tabla de movimientos recientes">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Categoría</th>
+            <th>Importe</th>
+            <th>Estado</th>
+            <th class="actions-cell">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="transactionsTable">
+          <tr>
+            <td colspan="6" class="muted">Sin movimientos.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const accountSelect = document.getElementById('accountSelect');
+    const categoryType = document.getElementById('categoryType');
+    const categoryName = document.getElementById('categoryName');
+    const amount = document.getElementById('amount');
+    const transactionDate = document.getElementById('transactionDate');
+    const description = document.getElementById('description');
+    const saveTransaction = document.getElementById('saveTransaction');
+    const transactionStatus = document.getElementById('transactionStatus');
+    const transactionsTable = document.getElementById('transactionsTable');
+    const goalSelect = document.getElementById('goalSelect');
+
+    const today = new Date().toISOString().slice(0, 10);
+    transactionDate.value = transactionDate.value || today;
+
+    /**
+     * Carga cuentas disponibles en el desplegable.
+     */
+    async function loadAccounts() {
+      const response = await fetch('/app/api/accounts');
+      const data = await response.json();
+      accountSelect.innerHTML = '';
+      data.forEach((account) => {
+        const option = document.createElement('option');
+        option.value = account.name;
+        option.textContent = `${account.name} (${account.currency})`;
+        accountSelect.appendChild(option);
+      });
+    }
+
+    /**
+     * Carga objetivos financieros para asociarlos opcionalmente.
+     */
+    async function loadGoals() {
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        return;
+      }
+      const response = await fetch(`/app/api/goals?accountName=${encodeURIComponent(accountName)}`);
+      const data = await response.json();
+      goalSelect.innerHTML = '<option value="">Sin objetivo</option>';
+      data.forEach((goal) => {
+        const option = document.createElement('option');
+        option.value = goal.id;
+        option.textContent = `${goal.name} · ${goal.currentAmount}/${goal.targetAmount}`;
+        goalSelect.appendChild(option);
+      });
+    }
+
+    /**
+     * Elimina una transacción registrada usando el servicio backend.
+     */
+    async function deleteTransaction(transactionId) {
+      if (!transactionId) {
+        return;
+      }
+
+      const confirmDelete = window.confirm('¿Deseas eliminar este movimiento?');
+      if (!confirmDelete) {
+        return;
+      }
+
+      transactionStatus.textContent = 'Eliminando movimiento...';
+      try {
+        const response = await fetch(`/app/api/transactions/${transactionId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) {
+          throw new Error('No se pudo eliminar el movimiento.');
+        }
+
+        transactionStatus.textContent = 'Movimiento eliminado correctamente.';
+        await loadTransactions();
+        await loadGoals();
+      } catch (error) {
+        transactionStatus.textContent = 'No se pudo eliminar el movimiento.';
+        console.error(error);
+      }
+    }
+
+    /**
+     * Crea una celda de tabla con texto seguro.
+     */
+    function createTextCell(text) {
+      const cell = document.createElement('td');
+      cell.textContent = text;
+      return cell;
+    }
+
+    /**
+     * Crea la celda de estado con estilos.
+     */
+    function createStatusCell() {
+      const cell = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = 'status';
+      badge.textContent = 'Confirmado';
+      cell.appendChild(badge);
+      return cell;
+    }
+
+    /**
+     * Crea la celda de acciones con el botón de eliminar.
+     */
+    function createActionsCell(transactionId) {
+      const cell = document.createElement('td');
+      cell.className = 'actions-cell';
+      const button = document.createElement('button');
+      button.className = 'danger';
+      button.type = 'button';
+      button.textContent = 'Eliminar';
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        await deleteTransaction(transactionId);
+        button.disabled = false;
+      });
+      cell.appendChild(button);
+      return cell;
+    }
+
+    /**
+     * Crea una fila completa para la tabla de movimientos.
+     */
+    function createTransactionRow(transaction) {
+      const row = document.createElement('tr');
+      row.appendChild(createTextCell(transaction.transactionDate));
+      row.appendChild(createTextCell(transaction.description || 'Sin descripción'));
+      row.appendChild(
+        createTextCell(`${transaction.categoryName} (${transaction.categoryType})`)
+      );
+      row.appendChild(createTextCell(transaction.amount));
+      row.appendChild(createStatusCell());
+      row.appendChild(createActionsCell(transaction.id));
+      return row;
+    }
+
+    /**
+     * Registra un movimiento real.
+     */
+    async function registerTransaction() {
+      const accountName = accountSelect.value;
+      if (!accountName || !categoryName.value.trim() || !amount.value) {
+        transactionStatus.textContent = 'Completa los datos obligatorios.';
+        return;
+      }
+
+      saveTransaction.disabled = true;
+      try {
+        const response = await fetch('/app/api/transactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accountName,
+            categoryName: categoryName.value.trim(),
+            categoryType: categoryType.value,
+            amount: Number(amount.value),
+            transactionDate: transactionDate.value,
+            description: description.value.trim()
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('No se pudo registrar el movimiento.');
+        }
+
+        const goalId = goalSelect.value;
+        if (goalId) {
+          await fetch(`/app/api/goals/${goalId}/progress`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: Number(amount.value) })
+          });
+        }
+
+        transactionStatus.textContent = 'Movimiento registrado correctamente.';
+        categoryName.value = '';
+        amount.value = '';
+        description.value = '';
+        await loadTransactions();
+        await loadGoals();
+      } catch (error) {
+        transactionStatus.textContent = 'No se pudo registrar el movimiento.';
+        console.error(error);
+      } finally {
+        saveTransaction.disabled = false;
+      }
+    }
+
+    /**
+     * Carga movimientos recientes del mes actual.
+     */
+    async function loadTransactions() {
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        return;
+      }
+      const startDate = new Date();
+      startDate.setDate(1);
+      const start = startDate.toISOString().slice(0, 10);
+      const end = today;
+
+      const response = await fetch(
+        `/app/api/accounts/by-name/${encodeURIComponent(accountName)}/transactions?startDate=${start}&endDate=${end}`
+      );
+      const data = await response.json();
+
+      transactionsTable.innerHTML = '';
+      if (!data.transactions.length) {
+        transactionsTable.innerHTML = '<tr><td colspan="6" class="muted">Sin movimientos.</td></tr>';
+        return;
+      }
+
+      data.transactions.forEach((transaction) => {
+        transactionsTable.appendChild(createTransactionRow(transaction));
+      });
+    }
+
+    accountSelect.addEventListener('change', async () => {
+      await loadGoals();
+      await loadTransactions();
+    });
+    saveTransaction.addEventListener('click', registerTransaction);
+
+    loadAccounts().then(async () => {
+      await loadGoals();
+      await loadTransactions();
+    });
+  </script>
+</body>
+</html>

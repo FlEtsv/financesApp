@@ -24,6 +24,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("""
         select t
         from Transaction t
+        join fetch t.category category
         where t.account.id = :accountId
           and t.transactionDate between :startDate and :endDate
         order by t.transactionDate asc
@@ -69,6 +70,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("""
         select t
         from Transaction t
+        join fetch t.category category
         where lower(t.account.name) = lower(:accountName)
           and t.transactionDate between :startDate and :endDate
         order by t.transactionDate asc
@@ -106,5 +108,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Object[]> totalsByCategoryAndAccountName(
         @Param("accountName") String accountName,
         @Param("type") CategoryType type
+    );
+
+    /**
+     * Suma de montos por tipo de categoría en un rango de fechas por cuenta.
+     */
+    @Query("""
+        select coalesce(sum(t.amount), 0)
+        from Transaction t
+        where lower(t.account.name) = lower(:accountName)
+          and t.category.type = :type
+          and t.transactionDate between :startDate and :endDate
+        """)
+    BigDecimal sumByAccountNameAndCategoryTypeWithinDateRange(
+        @Param("accountName") String accountName,
+        @Param("type") CategoryType type,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate
     );
 }

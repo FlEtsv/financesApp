@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finances App · Objetivos financieros</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      --primary: #1f3a8a;
+      --bg: #f3f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      padding: 28px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: #dbeafe;
+    }
+
+    .nav-link {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-decoration: none;
+    }
+
+    main {
+      padding: 32px 36px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .grid-form {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .goal-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: #f8fafc;
+    }
+
+    .goal-card strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Objetivos financieros</h1>
+      <p class="subtitle">Define metas y registra progreso mes a mes.</p>
+    </div>
+    <div class="actions">
+      <a class="nav-link" href="/app/index.html">Dashboard</a>
+      <a class="nav-link" href="/app/movimientos.html">Ingresos y gastos</a>
+      <a class="nav-link" href="/app/fijos.html">Gastos/ingresos fijos</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Crear objetivo financiero</h2>
+      <div class="grid-form">
+        <div>
+          <label for="accountSelect">Cuenta</label>
+          <select id="accountSelect"></select>
+        </div>
+        <div>
+          <label for="goalName">Nombre del objetivo</label>
+          <input id="goalName" type="text" placeholder="Ej: Fondo de emergencia" />
+        </div>
+        <div>
+          <label for="targetAmount">Meta económica</label>
+          <input id="targetAmount" type="number" step="0.01" />
+        </div>
+        <div>
+          <label for="currentAmount">Monto actual</label>
+          <input id="currentAmount" type="number" step="0.01" />
+        </div>
+        <div>
+          <label for="targetDate">Fecha objetivo</label>
+          <input id="targetDate" type="date" />
+        </div>
+        <div>
+          <label for="description">Descripción</label>
+          <textarea id="description" rows="2" placeholder="Detalle del objetivo"></textarea>
+        </div>
+        <div style="align-self: end;">
+          <button id="createGoal" class="primary">Guardar objetivo</button>
+        </div>
+      </div>
+      <p class="muted" id="goalStatus">Sin objetivos nuevos.</p>
+    </section>
+
+    <section class="card">
+      <h2>Actualizar progreso</h2>
+      <div class="grid-form">
+        <div>
+          <label for="goalSelect">Objetivo</label>
+          <select id="goalSelect"></select>
+        </div>
+        <div>
+          <label for="progressAmount">Importe a sumar</label>
+          <input id="progressAmount" type="number" step="0.01" />
+        </div>
+        <div style="align-self: end;">
+          <button id="updateProgress" class="primary">Registrar progreso</button>
+        </div>
+      </div>
+      <p class="muted" id="progressStatus">Sin actualizaciones.</p>
+    </section>
+
+    <section class="card">
+      <h2>Objetivos activos</h2>
+      <div id="goalsList" class="grid-form"></div>
+    </section>
+  </main>
+
+  <script>
+    const accountSelect = document.getElementById('accountSelect');
+    const goalName = document.getElementById('goalName');
+    const targetAmount = document.getElementById('targetAmount');
+    const currentAmount = document.getElementById('currentAmount');
+    const targetDate = document.getElementById('targetDate');
+    const description = document.getElementById('description');
+    const createGoal = document.getElementById('createGoal');
+    const goalStatus = document.getElementById('goalStatus');
+    const goalsList = document.getElementById('goalsList');
+    const goalSelect = document.getElementById('goalSelect');
+    const progressAmount = document.getElementById('progressAmount');
+    const updateProgress = document.getElementById('updateProgress');
+    const progressStatus = document.getElementById('progressStatus');
+
+    const today = new Date().toISOString().slice(0, 10);
+    targetDate.value = targetDate.value || today;
+
+    /**
+     * Carga cuentas disponibles en el desplegable.
+     */
+    async function loadAccounts() {
+      const response = await fetch('/app/api/accounts');
+      const data = await response.json();
+      accountSelect.innerHTML = '';
+      data.forEach((account) => {
+        const option = document.createElement('option');
+        option.value = account.name;
+        option.textContent = `${account.name} (${account.currency})`;
+        accountSelect.appendChild(option);
+      });
+    }
+
+    /**
+     * Lista objetivos financieros de la cuenta seleccionada.
+     */
+    async function loadGoals() {
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        return;
+      }
+      const response = await fetch(`/app/api/goals?accountName=${encodeURIComponent(accountName)}`);
+      const goals = await response.json();
+
+      goalsList.innerHTML = '';
+      goalSelect.innerHTML = '';
+      if (!goals.length) {
+        goalsList.innerHTML = '<p class="muted">Sin objetivos registrados.</p>';
+        return;
+      }
+
+      goals.forEach((goal) => {
+        const card = document.createElement('div');
+        card.className = 'goal-card';
+        card.innerHTML = `
+          <strong>${goal.name}</strong>
+          <div class="muted">Meta: ${goal.targetAmount} · Avance: ${goal.currentAmount}</div>
+          <div class="muted">Fecha objetivo: ${goal.targetDate}</div>
+          <span class="status">Activo</span>
+        `;
+        goalsList.appendChild(card);
+
+        const option = document.createElement('option');
+        option.value = goal.id;
+        option.textContent = `${goal.name} (${goal.currentAmount}/${goal.targetAmount})`;
+        goalSelect.appendChild(option);
+      });
+    }
+
+    /**
+     * Crea un nuevo objetivo financiero.
+     */
+    async function createNewGoal() {
+      const accountName = accountSelect.value;
+      if (!accountName || !goalName.value.trim() || !targetAmount.value) {
+        goalStatus.textContent = 'Completa los datos obligatorios.';
+        return;
+      }
+      createGoal.disabled = true;
+      try {
+        const response = await fetch('/app/api/goals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accountName,
+            name: goalName.value.trim(),
+            targetAmount: Number(targetAmount.value),
+            currentAmount: Number(currentAmount.value || 0),
+            targetDate: targetDate.value,
+            description: description.value.trim()
+          })
+        });
+        if (!response.ok) {
+          throw new Error('No se pudo crear el objetivo.');
+        }
+        goalStatus.textContent = 'Objetivo creado correctamente.';
+        goalName.value = '';
+        targetAmount.value = '';
+        currentAmount.value = '';
+        description.value = '';
+        await loadGoals();
+      } catch (error) {
+        goalStatus.textContent = 'No se pudo crear el objetivo.';
+        console.error(error);
+      } finally {
+        createGoal.disabled = false;
+      }
+    }
+
+    /**
+     * Suma progreso a un objetivo seleccionado.
+     */
+    async function registerProgress() {
+      const goalId = goalSelect.value;
+      if (!goalId || !progressAmount.value) {
+        progressStatus.textContent = 'Selecciona un objetivo y un importe.';
+        return;
+      }
+      updateProgress.disabled = true;
+      try {
+        const response = await fetch(`/app/api/goals/${goalId}/progress`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: Number(progressAmount.value) })
+        });
+        if (!response.ok) {
+          throw new Error('No se pudo actualizar el progreso.');
+        }
+        progressStatus.textContent = 'Progreso actualizado correctamente.';
+        progressAmount.value = '';
+        await loadGoals();
+      } catch (error) {
+        progressStatus.textContent = 'No se pudo actualizar el progreso.';
+        console.error(error);
+      } finally {
+        updateProgress.disabled = false;
+      }
+    }
+
+    accountSelect.addEventListener('change', loadGoals);
+    createGoal.addEventListener('click', createNewGoal);
+    updateProgress.addEventListener('click', registerProgress);
+
+    loadAccounts().then(loadGoals);
+  </script>
+</body>
+</html>

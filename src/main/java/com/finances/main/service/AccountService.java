@@ -2,6 +2,7 @@ package com.finances.main.service;
 
 import com.finances.main.model.Account;
 import com.finances.main.repository.AccountRepository;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,20 @@ public class AccountService {
     /**
      * Crea una nueva cuenta validando nombre único.
      */
-    public Account createAccount(String name, String currency) {
+    public Account createAccount(String name, String currency, BigDecimal initialBalance) {
         if (accountRepository.existsByNameIgnoreCase(name)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una cuenta con ese nombre.");
         }
-        Account account = new Account(name, currency);
+        Account account = new Account(name, currency, initialBalance);
+        return accountRepository.save(account);
+    }
+
+    /**
+     * Actualiza el saldo inicial de una cuenta por nombre.
+     */
+    public Account updateInitialBalance(String accountName, BigDecimal initialBalance) {
+        Account account = getByName(accountName);
+        account.setInitialBalance(initialBalance);
         return accountRepository.save(account);
     }
 
