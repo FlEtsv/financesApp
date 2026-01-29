@@ -60,4 +60,15 @@ public class PlannedMovementService {
     public List<PlannedMovement> listByAccountName(String accountName) {
         return plannedMovementRepository.findByAccountNameIgnoreCaseOrderByStartDateDesc(accountName);
     }
+
+    /**
+     * Lista movimientos planificados filtrando por tipos específicos.
+     */
+    @Transactional(readOnly = true)
+    public List<PlannedMovement> listByAccountNameAndTypes(
+        String accountName,
+        List<PlannedMovementType> types
+    ) {
+        return plannedMovementRepository.findByAccountNameAndTypes(accountName, types);
+    }
 }

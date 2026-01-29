@@ -52,6 +52,7 @@
 
     header .actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 12px;
     }
 
@@ -63,6 +64,20 @@
       color: var(--primary);
       font-weight: 600;
       cursor: pointer;
+    }
+
+    header a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .nav-link {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     main {
@@ -279,15 +294,17 @@
   </style>
 </head>
 <body>
-  <!-- Cabecera principal de la aplicación empresarial -->
+    <!-- Cabecera principal de la aplicación empresarial -->
   <header>
     <div>
       <h1>Finances App</h1>
       <p class="subtitle">Centro de control financiero · Operación en tiempo real</p>
     </div>
     <div class="actions">
-      <button type="button">Descargar reporte</button>
-      <button type="button">Configurar alertas</button>
+      <a class="nav-link" href="/app/index.html">Dashboard</a>
+      <a class="nav-link" href="/app/movimientos.html">Ingresos y gastos</a>
+      <a class="nav-link" href="/app/objetivos.html">Objetivos financieros</a>
+      <a class="nav-link" href="/app/fijos.html">Gastos/ingresos fijos</a>
     </div>
   </header>
 
@@ -363,6 +380,52 @@
       </div>
     </section>
 
+    <!-- Saldo inicial declarado por el usuario -->
+    <section class="card">
+      <h2>Saldo actual de la cuenta</h2>
+      <p class="muted">Define el dinero real disponible para empezar a calcular presupuestos.</p>
+      <div class="grid-form">
+        <div>
+          <label for="initialBalanceInput">Saldo inicial</label>
+          <input id="initialBalanceInput" type="number" step="0.01" placeholder="Ej: 1250.00" />
+        </div>
+        <div style="align-self: end;">
+          <button id="updateInitialBalance" class="primary">Guardar saldo</button>
+        </div>
+      </div>
+      <p class="muted" id="initialBalanceStatus">Sin actualizar.</p>
+    </section>
+
+    <!-- Presupuesto ideal vs. real -->
+    <section class="grid grid-2">
+      <div class="card">
+        <h2>Presupuesto ideal</h2>
+        <p class="muted">Calculado a partir de ingresos y gastos fijos.</p>
+        <div class="metric">
+          <span>Balance esperado</span>
+          <strong id="expectedBalance">€ --</strong>
+        </div>
+        <div class="divider"></div>
+        <div class="list">
+          <div class="list-item">Ingresos fijos: <strong id="fixedIncome">€ --</strong></div>
+          <div class="list-item">Gastos fijos: <strong id="fixedExpense">€ --</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Presupuesto real</h2>
+        <p class="muted">Basado en los movimientos registrados en el rango actual.</p>
+        <div class="metric">
+          <span>Balance real</span>
+          <strong id="actualBalance">€ --</strong>
+        </div>
+        <div class="divider"></div>
+        <div class="list">
+          <div class="list-item">Ingresos reales: <strong id="actualIncome">€ --</strong></div>
+          <div class="list-item">Gastos reales: <strong id="actualExpense">€ --</strong></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Visualización gráfica -->
     <section class="grid grid-2">
       <div class="card">
@@ -396,6 +459,10 @@
             <option value="USD">USD</option>
             <option value="MXN">MXN</option>
           </select>
+        </div>
+        <div>
+          <label for="newAccountBalance">Saldo inicial</label>
+          <input id="newAccountBalance" type="number" step="0.01" placeholder="Ej: 800.00" />
         </div>
         <div style="align-self: end;">
           <button id="createAccount" class="primary">Crear cuenta</button>
@@ -501,6 +568,15 @@
     const metricBalance = document.getElementById('metricBalance');
     const metricIncome = document.getElementById('metricIncome');
     const metricExpenses = document.getElementById('metricExpenses');
+    const initialBalanceInput = document.getElementById('initialBalanceInput');
+    const updateInitialBalanceButton = document.getElementById('updateInitialBalance');
+    const initialBalanceStatus = document.getElementById('initialBalanceStatus');
+    const expectedBalance = document.getElementById('expectedBalance');
+    const fixedIncome = document.getElementById('fixedIncome');
+    const fixedExpense = document.getElementById('fixedExpense');
+    const actualBalance = document.getElementById('actualBalance');
+    const actualIncome = document.getElementById('actualIncome');
+    const actualExpense = document.getElementById('actualExpense');
     const transactionsTable = document.getElementById('transactionsTable');
     const chatWindow = document.getElementById('chatWindow');
     const chatInput = document.getElementById('chatInput');
@@ -509,6 +585,7 @@
     const trendChart = document.getElementById('trendChart');
     const newAccountName = document.getElementById('newAccountName');
     const newAccountCurrency = document.getElementById('newAccountCurrency');
+    const newAccountBalance = document.getElementById('newAccountBalance');
     const createAccountButton = document.getElementById('createAccount');
     const plannedName = document.getElementById('plannedName');
     const plannedAmount = document.getElementById('plannedAmount');
@@ -680,11 +757,14 @@
           option.value = account.name;
           option.textContent = `${account.name} (${account.currency})`;
           option.dataset.currency = account.currency;
+          option.dataset.initialBalance = account.initialBalance || 0;
           accountSelect.appendChild(option);
         });
         if (data.length) {
           accountSelect.value = data[0].name;
           currencySelect.value = data[0].currency;
+          initialBalanceInput.value = data[0].initialBalance || 0;
+          initialBalanceStatus.textContent = 'Saldo cargado desde la cuenta.';
         } else {
           const option = document.createElement('option');
           option.value = '';
@@ -705,17 +785,19 @@
         return;
       }
       const currency = newAccountCurrency.value;
+      const initialBalance = Number(newAccountBalance.value || 0);
       createAccountButton.disabled = true;
       try {
         const response = await fetch('/app/api/accounts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, currency })
+          body: JSON.stringify({ name, currency, initialBalance })
         });
         if (!response.ok) {
           throw new Error('No se pudo crear la cuenta.');
         }
         newAccountName.value = '';
+        newAccountBalance.value = '';
         await loadAccounts();
         await loadDashboardData();
       } catch (error) {
@@ -795,6 +877,35 @@
         console.error(error);
       } finally {
         createPlannedButton.disabled = false;
+      }
+    }
+
+    /**
+     * Actualiza el saldo inicial en la cuenta seleccionada.
+     */
+    async function updateInitialBalance() {
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        return;
+      }
+      updateInitialBalanceButton.disabled = true;
+      const initialBalance = Number(initialBalanceInput.value || 0);
+      try {
+        const response = await fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/initial-balance`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initialBalance })
+        });
+        if (!response.ok) {
+          throw new Error('No se pudo actualizar el saldo.');
+        }
+        initialBalanceStatus.textContent = 'Saldo actualizado correctamente.';
+        await loadDashboardData();
+      } catch (error) {
+        initialBalanceStatus.textContent = 'No se pudo actualizar el saldo.';
+        console.error(error);
+      } finally {
+        updateInitialBalanceButton.disabled = false;
       }
     }
 
@@ -893,19 +1004,21 @@
       const endDate = endDateInput.value;
 
       try {
-        const [balanceRes, totalsRes, transactionsRes] = await Promise.all([
+        const [balanceRes, totalsRes, transactionsRes, budgetRes] = await Promise.all([
           fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/balance`),
           fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/totals?type=${type}`),
-          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/transactions?startDate=${startDate}&endDate=${endDate}`)
+          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/transactions?startDate=${startDate}&endDate=${endDate}`),
+          fetch(`/app/api/budget/summary?accountName=${encodeURIComponent(accountName)}&startDate=${startDate}&endDate=${endDate}`)
         ]);
 
-        if (!balanceRes.ok || !totalsRes.ok || !transactionsRes.ok) {
+        if (!balanceRes.ok || !totalsRes.ok || !transactionsRes.ok || !budgetRes.ok) {
           throw new Error('No se pudieron cargar los datos del dashboard.');
         }
 
         const balanceData = await balanceRes.json();
         const totalsData = await totalsRes.json();
         const transactionsData = await transactionsRes.json();
+        const budgetData = await budgetRes.json();
 
         const totals = totalsData.totals || totalsData.totalsByCategory || {};
         const totalIncome = Object.values(totals).reduce((acc, value) => acc + Number(value), 0);
@@ -916,6 +1029,12 @@
         renderTransactions(transactionsData.transactions || []);
         renderTotalsChart(totals);
         renderTrendChart(transactionsData.transactions || []);
+        expectedBalance.textContent = formatCurrency(budgetData.expectedBalance || 0);
+        fixedIncome.textContent = formatCurrency(budgetData.fixedIncome || 0);
+        fixedExpense.textContent = formatCurrency(budgetData.fixedExpense || 0);
+        actualBalance.textContent = formatCurrency(budgetData.actualBalance || 0);
+        actualIncome.textContent = formatCurrency(budgetData.actualIncome || 0);
+        actualExpense.textContent = formatCurrency(budgetData.actualExpense || 0);
       } catch (error) {
         metricBalance.textContent = '€ --';
         metricIncome.textContent = '€ --';
@@ -923,6 +1042,12 @@
         renderTransactions([]);
         renderTotalsChart({});
         renderTrendChart([]);
+        expectedBalance.textContent = '€ --';
+        fixedIncome.textContent = '€ --';
+        fixedExpense.textContent = '€ --';
+        actualBalance.textContent = '€ --';
+        actualIncome.textContent = '€ --';
+        actualExpense.textContent = '€ --';
         console.error(error);
       } finally {
         loadButton.disabled = false;
@@ -933,10 +1058,15 @@
     sendChatButton.addEventListener('click', sendChat);
     createAccountButton.addEventListener('click', createAccount);
     createPlannedButton.addEventListener('click', createPlannedMovement);
+    updateInitialBalanceButton.addEventListener('click', updateInitialBalance);
     accountSelect.addEventListener('change', () => {
       const selectedOption = accountSelect.selectedOptions[0];
       if (selectedOption && selectedOption.dataset.currency) {
         currencySelect.value = selectedOption.dataset.currency;
+      }
+      if (selectedOption && selectedOption.dataset.initialBalance) {
+        initialBalanceInput.value = selectedOption.dataset.initialBalance;
+        initialBalanceStatus.textContent = 'Saldo cargado desde la cuenta.';
       }
       loadDashboardData();
       loadPlannedMovements();

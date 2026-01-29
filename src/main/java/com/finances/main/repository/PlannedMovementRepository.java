@@ -23,4 +23,20 @@ public interface PlannedMovementRepository extends JpaRepository<PlannedMovement
     List<PlannedMovement> findByAccountNameIgnoreCaseOrderByStartDateDesc(
         @Param("accountName") String accountName
     );
+
+    /**
+     * Obtiene movimientos planificados filtrando por tipo.
+     */
+    @Query("""
+        select movement
+        from PlannedMovement movement
+        join fetch movement.account account
+        where lower(account.name) = lower(:accountName)
+          and movement.type in :types
+        order by movement.startDate desc
+        """)
+    List<PlannedMovement> findByAccountNameAndTypes(
+        @Param("accountName") String accountName,
+        @Param("types") List<com.finances.main.model.PlannedMovementType> types
+    );
 }

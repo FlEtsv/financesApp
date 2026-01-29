@@ -4,15 +4,24 @@ import com.finances.main.model.CategoryType;
 import com.finances.main.model.PlannedMovement;
 import com.finances.main.model.Transaction;
 import com.finances.main.service.AccountService;
+import com.finances.main.service.BudgetService;
+import com.finances.main.service.FinancialGoalService;
 import com.finances.main.service.LedgerService;
 import com.finances.main.service.PlannedMovementService;
+import com.finances.main.service.TransactionService;
 import com.finances.main.service.ai.ExtChatClient;
+import com.finances.main.web.dto.AccountDtos.AccountBalanceUpdateRequest;
 import com.finances.main.web.dto.AccountDtos.AccountCreateRequest;
 import com.finances.main.web.dto.AccountDtos.AccountSummary;
 import com.finances.main.web.dto.AiDtos.AiChatRequest;
 import com.finances.main.web.dto.AiDtos.AiChatResponse;
 import com.finances.main.web.dto.AiDtos.AiContextResponse;
 import com.finances.main.web.dto.AiDtos.PlannedMovementSummary;
+import com.finances.main.web.dto.BudgetDtos.BudgetSummaryResponse;
+import com.finances.main.web.dto.BudgetDtos.MonthlySummaryResponse;
+import com.finances.main.web.dto.FinancialGoalDtos.FinancialGoalCreateRequest;
+import com.finances.main.web.dto.FinancialGoalDtos.FinancialGoalProgressRequest;
+import com.finances.main.web.dto.FinancialGoalDtos.FinancialGoalResponse;
 import com.finances.main.web.dto.LedgerResponses.BalanceByNameResponse;
 import com.finances.main.web.dto.LedgerResponses.BalanceResponse;
 import com.finances.main.web.dto.LedgerResponses.CategoryTotalsByNameResponse;
@@ -20,10 +29,14 @@ import com.finances.main.web.dto.LedgerResponses.CategoryTotalsResponse;
 import com.finances.main.web.dto.LedgerResponses.TransactionSummary;
 import com.finances.main.web.dto.LedgerResponses.TransactionsByNameResponse;
 import com.finances.main.web.dto.LedgerResponses.TransactionsResponse;
+import com.finances.main.web.dto.PlannedMovementDtos.FixedMovementsOverview;
 import com.finances.main.web.dto.PlannedMovementDtos.PlannedMovementRequest;
 import com.finances.main.web.dto.PlannedMovementDtos.PlannedMovementResponse;
+import com.finances.main.web.dto.TransactionDtos.TransactionCreateRequest;
+import com.finances.main.web.dto.TransactionDtos.TransactionResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.EnumSet;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -48,17 +61,26 @@ public class AppApiController {
     private final LedgerService ledgerService;
     private final AccountService accountService;
     private final PlannedMovementService plannedMovementService;
+    private final TransactionService transactionService;
+    private final FinancialGoalService financialGoalService;
+    private final BudgetService budgetService;
     private final ExtChatClient extChatClient;
 
     public AppApiController(
         LedgerService ledgerService,
         AccountService accountService,
         PlannedMovementService plannedMovementService,
+        TransactionService transactionService,
+        FinancialGoalService financialGoalService,
+        BudgetService budgetService,
         ExtChatClient extChatClient
     ) {
         this.ledgerService = ledgerService;
         this.accountService = accountService;
         this.plannedMovementService = plannedMovementService;
+        this.transactionService = transactionService;
+        this.financialGoalService = financialGoalService;
+        this.budgetService = budgetService;
         this.extChatClient = extChatClient;
     }
 
@@ -147,6 +169,7 @@ public class AppApiController {
                 account.getId(),
                 account.getName(),
                 account.getCurrency(),
+                account.getInitialBalance(),
                 account.getCreatedAt()
             ))
             .collect(Collectors.toList());
@@ -158,8 +181,57 @@ public class AppApiController {
     @PostMapping("/accounts")
     @ResponseStatus(HttpStatus.CREATED)
     public AccountSummary createAccount(@RequestBody AccountCreateRequest request) {
-        var account = accountService.createAccount(request.name(), request.currency());
-        return new AccountSummary(account.getId(), account.getName(), account.getCurrency(), account.getCreatedAt());
+        var account = accountService.createAccount(request.name(), request.currency(), request.initialBalance());
+        return new AccountSummary(
+            account.getId(),
+            account.getName(),
+            account.getCurrency(),
+            account.getInitialBalance(),
+            account.getCreatedAt()
+        );
+    }
+
+    /**
+     * Actualiza el saldo inicial de una cuenta.
+     */
+    @PostMapping("/accounts/by-name/{accountName}/initial-balance")
+    public AccountSummary updateInitialBalance(
+        @PathVariable String accountName,
+        @RequestBody AccountBalanceUpdateRequest request
+    ) {
+        var account = accountService.updateInitialBalance(accountName, request.initialBalance());
+        return new AccountSummary(
+            account.getId(),
+            account.getName(),
+            account.getCurrency(),
+            account.getInitialBalance(),
+            account.getCreatedAt()
+        );
+    }
+
+    /**
+     * Registra un movimiento real (ingreso o gasto).
+     */
+    @PostMapping("/transactions")
+    @ResponseStatus(HttpStatus.CREATED)
+    public TransactionResponse createTransaction(@RequestBody TransactionCreateRequest request) {
+        Transaction transaction = transactionService.registerTransaction(
+            request.accountName(),
+            request.categoryName(),
+            request.categoryType(),
+            request.amount(),
+            request.transactionDate(),
+            request.description()
+        );
+        return new TransactionResponse(
+            transaction.getId(),
+            transaction.getAccount().getName(),
+            transaction.getCategory().getName(),
+            transaction.getCategory().getType(),
+            transaction.getAmount(),
+            transaction.getTransactionDate(),
+            transaction.getDescription()
+        );
     }
 
     /**
@@ -187,6 +259,146 @@ public class AppApiController {
     public List<PlannedMovementResponse> listPlannedMovements(@RequestParam String accountName) {
         return plannedMovementService.listByAccountName(accountName).stream()
             .map(this::toMovementResponse)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Lista movimientos fijos e ingresos fijos por cuenta.
+     */
+    @GetMapping("/planned-movements/fixed")
+    public FixedMovementsOverview listFixedMovements(@RequestParam String accountName) {
+        List<PlannedMovementResponse> fixedExpenses = plannedMovementService.listByAccountNameAndTypes(
+            accountName,
+            List.copyOf(EnumSet.of(com.finances.main.model.PlannedMovementType.GASTO_FIJO))
+        ).stream().map(this::toMovementResponse).collect(Collectors.toList());
+
+        List<PlannedMovementResponse> fixedIncome = plannedMovementService.listByAccountNameAndTypes(
+            accountName,
+            List.copyOf(EnumSet.of(com.finances.main.model.PlannedMovementType.INGRESO_FIJO_NOMINA))
+        ).stream().map(this::toMovementResponse).collect(Collectors.toList());
+
+        BigDecimal totalFixedExpenses = fixedExpenses.stream()
+            .map(PlannedMovementResponse::amount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalFixedIncome = fixedIncome.stream()
+            .map(PlannedMovementResponse::amount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new FixedMovementsOverview(
+            accountName,
+            totalFixedExpenses,
+            totalFixedIncome,
+            fixedExpenses,
+            fixedIncome
+        );
+    }
+
+    /**
+     * Lista objetivos financieros por cuenta.
+     */
+    @GetMapping("/goals")
+    public List<FinancialGoalResponse> listGoals(@RequestParam String accountName) {
+        return financialGoalService.listGoals(accountName).stream()
+            .map(goal -> new FinancialGoalResponse(
+                goal.getId(),
+                goal.getAccount().getName(),
+                goal.getName(),
+                goal.getTargetAmount(),
+                goal.getCurrentAmount(),
+                goal.getTargetDate(),
+                goal.getDescription(),
+                goal.getCreatedAt()
+            ))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Crea un objetivo financiero.
+     */
+    @PostMapping("/goals")
+    @ResponseStatus(HttpStatus.CREATED)
+    public FinancialGoalResponse createGoal(@RequestBody FinancialGoalCreateRequest request) {
+        var goal = financialGoalService.createGoal(
+            request.accountName(),
+            request.name(),
+            request.targetAmount(),
+            request.currentAmount(),
+            request.targetDate(),
+            request.description()
+        );
+        return new FinancialGoalResponse(
+            goal.getId(),
+            goal.getAccount().getName(),
+            goal.getName(),
+            goal.getTargetAmount(),
+            goal.getCurrentAmount(),
+            goal.getTargetDate(),
+            goal.getDescription(),
+            goal.getCreatedAt()
+        );
+    }
+
+    /**
+     * Registra progreso en un objetivo financiero.
+     */
+    @PostMapping("/goals/{goalId}/progress")
+    public FinancialGoalResponse addGoalProgress(
+        @PathVariable Long goalId,
+        @RequestBody FinancialGoalProgressRequest request
+    ) {
+        var goal = financialGoalService.addProgress(goalId, request.amount());
+        return new FinancialGoalResponse(
+            goal.getId(),
+            goal.getAccount().getName(),
+            goal.getName(),
+            goal.getTargetAmount(),
+            goal.getCurrentAmount(),
+            goal.getTargetDate(),
+            goal.getDescription(),
+            goal.getCreatedAt()
+        );
+    }
+
+    /**
+     * Construye el resumen presupuestario para un rango de fechas.
+     */
+    @GetMapping("/budget/summary")
+    public BudgetSummaryResponse getBudgetSummary(
+        @RequestParam String accountName,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        var summary = budgetService.buildSummary(accountName, startDate, endDate);
+        return new BudgetSummaryResponse(
+            summary.accountName(),
+            summary.startDate(),
+            summary.endDate(),
+            summary.initialBalance(),
+            summary.fixedIncome(),
+            summary.fixedExpense(),
+            summary.actualIncome(),
+            summary.actualExpense(),
+            summary.expectedBalance(),
+            summary.actualBalance()
+        );
+    }
+
+    /**
+     * Devuelve un resumen mensual por año.
+     */
+    @GetMapping("/budget/monthly")
+    public List<MonthlySummaryResponse> getMonthlySummary(
+        @RequestParam String accountName,
+        @RequestParam int year
+    ) {
+        return budgetService.buildMonthlySummary(accountName, year).stream()
+            .map(summary -> new MonthlySummaryResponse(
+                summary.year(),
+                summary.month(),
+                summary.income(),
+                summary.expense(),
+                summary.balance()
+            ))
             .collect(Collectors.toList());
     }
 

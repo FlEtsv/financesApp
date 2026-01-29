@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finances App · Gastos e ingresos fijos</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      --primary: #1f3a8a;
+      --bg: #f3f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      padding: 28px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: #dbeafe;
+    }
+
+    .nav-link {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-decoration: none;
+    }
+
+    main {
+      padding: 32px 36px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .grid-form {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .list-item {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      font-size: 13px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Gastos e ingresos fijos</h1>
+      <p class="subtitle">Gestiona obligaciones recurrentes y su impacto.</p>
+    </div>
+    <div class="actions">
+      <a class="nav-link" href="/app/index.html">Dashboard</a>
+      <a class="nav-link" href="/app/movimientos.html">Ingresos y gastos</a>
+      <a class="nav-link" href="/app/objetivos.html">Objetivos financieros</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Registrar movimiento fijo</h2>
+      <div class="grid-form">
+        <div>
+          <label for="accountSelect">Cuenta</label>
+          <select id="accountSelect"></select>
+        </div>
+        <div>
+          <label for="movementName">Nombre</label>
+          <input id="movementName" type="text" placeholder="Ej: Alquiler" />
+        </div>
+        <div>
+          <label for="movementAmount">Importe</label>
+          <input id="movementAmount" type="number" step="0.01" />
+        </div>
+        <div>
+          <label for="movementType">Tipo</label>
+          <select id="movementType">
+            <option value="GASTO_FIJO">Gasto fijo</option>
+            <option value="INGRESO_FIJO_NOMINA">Ingreso fijo</option>
+          </select>
+        </div>
+        <div>
+          <label for="movementPeriodicity">Periodicidad</label>
+          <select id="movementPeriodicity">
+            <option value="MENSUAL">Mensual</option>
+            <option value="BIMESTRAL">Bimestral</option>
+            <option value="TRIMESTRAL">Trimestral</option>
+            <option value="ANUAL">Anual</option>
+          </select>
+        </div>
+        <div>
+          <label for="movementStart">Fecha inicio</label>
+          <input id="movementStart" type="date" />
+        </div>
+        <div style="align-self: end;">
+          <button id="saveMovement" class="primary">Registrar</button>
+        </div>
+      </div>
+      <p class="muted" id="movementStatus">Sin movimientos nuevos.</p>
+    </section>
+
+    <section class="card">
+      <h2>Resumen de gastos e ingresos fijos</h2>
+      <p class="muted">Totales estimados para el presupuesto ideal.</p>
+      <div class="grid-form">
+        <div>
+          <strong>Gastos fijos</strong>
+          <p class="muted" id="fixedExpenseTotal">€ --</p>
+        </div>
+        <div>
+          <strong>Ingresos fijos</strong>
+          <p class="muted" id="fixedIncomeTotal">€ --</p>
+        </div>
+      </div>
+      <div class="grid-form">
+        <div>
+          <h3>Gastos fijos</h3>
+          <div class="list" id="fixedExpenseList"></div>
+        </div>
+        <div>
+          <h3>Ingresos fijos</h3>
+          <div class="list" id="fixedIncomeList"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const accountSelect = document.getElementById('accountSelect');
+    const movementName = document.getElementById('movementName');
+    const movementAmount = document.getElementById('movementAmount');
+    const movementType = document.getElementById('movementType');
+    const movementPeriodicity = document.getElementById('movementPeriodicity');
+    const movementStart = document.getElementById('movementStart');
+    const saveMovement = document.getElementById('saveMovement');
+    const movementStatus = document.getElementById('movementStatus');
+    const fixedExpenseTotal = document.getElementById('fixedExpenseTotal');
+    const fixedIncomeTotal = document.getElementById('fixedIncomeTotal');
+    const fixedExpenseList = document.getElementById('fixedExpenseList');
+    const fixedIncomeList = document.getElementById('fixedIncomeList');
+
+    const today = new Date().toISOString().slice(0, 10);
+    movementStart.value = movementStart.value || today;
+
+    /**
+     * Carga cuentas disponibles.
+     */
+    async function loadAccounts() {
+      const response = await fetch('/app/api/accounts');
+      const data = await response.json();
+      accountSelect.innerHTML = '';
+      data.forEach((account) => {
+        const option = document.createElement('option');
+        option.value = account.name;
+        option.textContent = `${account.name} (${account.currency})`;
+        accountSelect.appendChild(option);
+      });
+    }
+
+    /**
+     * Registra un movimiento fijo (gasto o ingreso).
+     */
+    async function registerFixedMovement() {
+      const accountName = accountSelect.value;
+      if (!accountName || !movementName.value.trim() || !movementAmount.value) {
+        movementStatus.textContent = 'Completa los datos obligatorios.';
+        return;
+      }
+      saveMovement.disabled = true;
+      try {
+        const response = await fetch('/app/api/planned-movements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accountName,
+            name: movementName.value.trim(),
+            amount: Number(movementAmount.value),
+            type: movementType.value,
+            periodicidad: movementPeriodicity.value,
+            startDate: movementStart.value,
+            active: true
+          })
+        });
+        if (!response.ok) {
+          throw new Error('No se pudo registrar el movimiento fijo.');
+        }
+        movementStatus.textContent = 'Movimiento fijo registrado.';
+        movementName.value = '';
+        movementAmount.value = '';
+        await loadFixedMovements();
+      } catch (error) {
+        movementStatus.textContent = 'No se pudo registrar el movimiento fijo.';
+        console.error(error);
+      } finally {
+        saveMovement.disabled = false;
+      }
+    }
+
+    /**
+     * Carga el resumen de gastos e ingresos fijos.
+     */
+    async function loadFixedMovements() {
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        return;
+      }
+      const response = await fetch(`/app/api/planned-movements/fixed?accountName=${encodeURIComponent(accountName)}`);
+      const data = await response.json();
+
+      fixedExpenseTotal.textContent = data.totalFixedExpenses;
+      fixedIncomeTotal.textContent = data.totalFixedIncome;
+
+      fixedExpenseList.innerHTML = '';
+      fixedIncomeList.innerHTML = '';
+
+      if (!data.fixedExpenses.length) {
+        fixedExpenseList.innerHTML = '<div class="list-item muted">Sin gastos fijos.</div>';
+      } else {
+        data.fixedExpenses.forEach((movement) => {
+          const item = document.createElement('div');
+          item.className = 'list-item';
+          item.innerHTML = `<strong>${movement.name}</strong> · ${movement.amount} · ${movement.periodicidad}`;
+          fixedExpenseList.appendChild(item);
+        });
+      }
+
+      if (!data.fixedIncome.length) {
+        fixedIncomeList.innerHTML = '<div class="list-item muted">Sin ingresos fijos.</div>';
+      } else {
+        data.fixedIncome.forEach((movement) => {
+          const item = document.createElement('div');
+          item.className = 'list-item';
+          item.innerHTML = `<strong>${movement.name}</strong> · ${movement.amount} · ${movement.periodicidad}`;
+          fixedIncomeList.appendChild(item);
+        });
+      }
+    }
+
+    accountSelect.addEventListener('change', loadFixedMovements);
+    saveMovement.addEventListener('click', registerFixedMovement);
+
+    loadAccounts().then(loadFixedMovements);
+  </script>
+</body>
+</html>
