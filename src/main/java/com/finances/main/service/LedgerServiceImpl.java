@@ -31,8 +31,27 @@ public class LedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    public BigDecimal calculateBalance(String accountName) {
+        BigDecimal income = transactionRepository.sumByAccountNameAndCategoryType(accountName, CategoryType.INGRESO);
+        BigDecimal expense = transactionRepository.sumByAccountNameAndCategoryType(accountName, CategoryType.GASTO);
+        return income.subtract(expense);
+    }
+
+    @Override
     public Map<String, BigDecimal> totalsByCategory(Long accountId, CategoryType type) {
         List<Object[]> rows = transactionRepository.totalsByCategory(accountId, type);
+        Map<String, BigDecimal> totals = new HashMap<>();
+        for (Object[] row : rows) {
+            String category = (String) row[0];
+            BigDecimal amount = (BigDecimal) row[1];
+            totals.put(category, amount);
+        }
+        return totals;
+    }
+
+    @Override
+    public Map<String, BigDecimal> totalsByCategory(String accountName, CategoryType type) {
+        List<Object[]> rows = transactionRepository.totalsByCategoryAndAccountName(accountName, type);
         Map<String, BigDecimal> totals = new HashMap<>();
         for (Object[] row : rows) {
             String category = (String) row[0];
@@ -46,5 +65,9 @@ public class LedgerServiceImpl implements LedgerService {
     public List<Transaction> listTransactions(Long accountId, LocalDate startDate, LocalDate endDate) {
         return transactionRepository.findByAccountAndDateRange(accountId, startDate, endDate);
     }
-}
 
+    @Override
+    public List<Transaction> listTransactions(String accountName, LocalDate startDate, LocalDate endDate) {
+        return transactionRepository.findByAccountNameAndDateRange(accountName, startDate, endDate);
+    }
+}

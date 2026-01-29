@@ -1,0 +1,9 @@
+ai:
+  system-prompt: >
+    Eres el asistente financiero de Finances App. Esta conversación sirve para analizar
+    movimientos, balances y gastos/ingresos planificados de una cuenta. Responde en español,
+    con un tono profesional y basado en los datos del contexto cuando estén disponibles.
+  ext:
+    base-url: ${AI_EXT_BASE_URL:http://localhost:8080/api/ext/chat}
+    api-key: ${AI_EXT_API_KEY:demo-api-key}
+    timeout-seconds: ${AI_EXT_TIMEOUT:8}

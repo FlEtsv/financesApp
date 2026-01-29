@@ -21,9 +21,21 @@ public final class LedgerResponses {
     }
 
     /**
+     * Respuesta con balance por nombre de cuenta.
+     */
+    public record BalanceByNameResponse(String accountName, BigDecimal balance) {
+    }
+
+    /**
      * Respuesta con totales por categoría.
      */
     public record CategoryTotalsResponse(Long accountId, CategoryType type, Map<String, BigDecimal> totals) {
+    }
+
+    /**
+     * Respuesta con totales por categoría usando nombre de cuenta.
+     */
+    public record CategoryTotalsByNameResponse(String accountName, CategoryType type, Map<String, BigDecimal> totals) {
     }
 
     /**
@@ -31,6 +43,17 @@ public final class LedgerResponses {
      */
     public record TransactionsResponse(
         Long accountId,
+        LocalDate startDate,
+        LocalDate endDate,
+        List<TransactionSummary> transactions
+    ) {
+    }
+
+    /**
+     * Respuesta con transacciones usando nombre de cuenta.
+     */
+    public record TransactionsByNameResponse(
+        String accountName,
         LocalDate startDate,
         LocalDate endDate,
         List<TransactionSummary> transactions

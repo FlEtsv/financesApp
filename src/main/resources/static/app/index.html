@@ -247,6 +247,35 @@
       color: var(--muted);
       font-size: 13px;
     }
+
+    .chart-container {
+      height: 240px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .list-item {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      font-size: 13px;
+    }
+
+    .grid-form {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
   </style>
 </head>
 <body>
@@ -287,14 +316,14 @@
       <h2>Panel operativo</h2>
       <div class="toolbar">
         <div>
-          <label for="accountId">Cuenta</label>
-          <input id="accountId" type="number" min="1" value="1" />
+          <label for="accountName">Cuenta</label>
+          <select id="accountName"></select>
         </div>
         <div>
           <label for="categoryType">Tipo de categoría</label>
           <select id="categoryType">
-            <option value="INCOME">Ingreso</option>
-            <option value="EXPENSE">Gasto</option>
+            <option value="INGRESO">Ingreso</option>
+            <option value="GASTO">Gasto</option>
           </select>
         </div>
         <div>
@@ -330,6 +359,89 @@
         <div>
           <span class="muted">Último cierre</span>
           <div class="status ok" id="statusClose">Hoy 09:30</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visualización gráfica -->
+    <section class="grid grid-2">
+      <div class="card">
+        <h2>Distribución por categoría</h2>
+        <p class="muted">Totales por categoría en la cuenta seleccionada.</p>
+        <div class="chart-container">
+          <canvas id="totalsChart" aria-label="Gráfico de totales por categoría"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Evolución de movimientos</h2>
+        <p class="muted">Tendencia diaria del rango seleccionado.</p>
+        <div class="chart-container">
+          <canvas id="trendChart" aria-label="Gráfico de evolución de movimientos"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gestión de cuentas y movimientos planificados -->
+    <section class="card">
+      <h2>Gestión de cuentas y movimientos planificados</h2>
+      <div class="grid-form">
+        <div>
+          <label for="newAccountName">Nueva cuenta</label>
+          <input id="newAccountName" type="text" placeholder="Ej: Cuenta principal" />
+        </div>
+        <div>
+          <label for="newAccountCurrency">Divisa</label>
+          <select id="newAccountCurrency">
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="MXN">MXN</option>
+          </select>
+        </div>
+        <div style="align-self: end;">
+          <button id="createAccount" class="primary">Crear cuenta</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="grid-form">
+        <div>
+          <label for="plannedName">Nombre del movimiento</label>
+          <input id="plannedName" type="text" placeholder="Ej: Nómina" />
+        </div>
+        <div>
+          <label for="plannedAmount">Importe</label>
+          <input id="plannedAmount" type="number" step="0.01" />
+        </div>
+        <div>
+          <label for="plannedType">Tipo</label>
+          <select id="plannedType">
+            <option value="GASTO_FIJO">Gasto fijo</option>
+            <option value="GASTO_VARIABLE">Gasto variable</option>
+            <option value="INGRESO_VARIABLE">Ingreso variable</option>
+            <option value="INGRESO_FIJO_NOMINA">Ingreso fijo / nómina</option>
+          </select>
+        </div>
+        <div>
+          <label for="plannedPeriodicity">Periodicidad</label>
+          <select id="plannedPeriodicity">
+            <option value="MENSUAL">Mensual</option>
+            <option value="BIMESTRAL">Bimestral</option>
+            <option value="TRIMESTRAL">Trimestral</option>
+            <option value="ANUAL">Anual</option>
+          </select>
+        </div>
+        <div>
+          <label for="plannedStartDate">Fecha inicio</label>
+          <input id="plannedStartDate" type="date" />
+        </div>
+        <div style="align-self: end;">
+          <button id="createPlanned" class="primary">Registrar movimiento</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <span class="muted">Movimientos planificados activos</span>
+        <div class="list" id="plannedList">
+          <div class="list-item muted">Sin movimientos registrados.</div>
         </div>
       </div>
     </section>
@@ -380,7 +492,7 @@
 
   <script>
     // Referencias principales de UI.
-    const accountInput = document.getElementById('accountId');
+    const accountSelect = document.getElementById('accountName');
     const categorySelect = document.getElementById('categoryType');
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
@@ -393,10 +505,25 @@
     const chatWindow = document.getElementById('chatWindow');
     const chatInput = document.getElementById('chatInput');
     const sendChatButton = document.getElementById('sendChat');
+    const totalsChart = document.getElementById('totalsChart');
+    const trendChart = document.getElementById('trendChart');
+    const newAccountName = document.getElementById('newAccountName');
+    const newAccountCurrency = document.getElementById('newAccountCurrency');
+    const createAccountButton = document.getElementById('createAccount');
+    const plannedName = document.getElementById('plannedName');
+    const plannedAmount = document.getElementById('plannedAmount');
+    const plannedType = document.getElementById('plannedType');
+    const plannedPeriodicity = document.getElementById('plannedPeriodicity');
+    const plannedStartDate = document.getElementById('plannedStartDate');
+    const createPlannedButton = document.getElementById('createPlanned');
+    const plannedList = document.getElementById('plannedList');
+
+    let chatSessionId = '';
 
     const today = new Date().toISOString().slice(0, 10);
     startDateInput.value = startDateInput.value || today;
     endDateInput.value = endDateInput.value || today;
+    plannedStartDate.value = plannedStartDate.value || today;
 
     /**
      * Formatea importes en la divisa seleccionada.
@@ -447,33 +574,264 @@
     }
 
     /**
+     * Ajusta el tamaño del canvas al contenedor actual.
+     */
+    function prepareCanvas(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const scale = window.devicePixelRatio || 1;
+      const ctx = canvas.getContext('2d');
+      canvas.width = rect.width * scale;
+      canvas.height = rect.height * scale;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(scale, scale);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    /**
+     * Dibuja un gráfico de barras con los totales por categoría.
+     */
+    function renderTotalsChart(totals) {
+      const entries = Object.entries(totals || {});
+      const { ctx, width, height } = prepareCanvas(totalsChart);
+      ctx.clearRect(0, 0, width, height);
+
+      if (!entries.length) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '14px Inter, sans-serif';
+        ctx.fillText('Sin datos para graficar.', 12, height / 2);
+        return;
+      }
+
+      const maxValue = Math.max(...entries.map(([, value]) => Number(value)));
+      const barWidth = Math.max(24, (width - 40) / entries.length - 12);
+
+      entries.forEach(([label, value], index) => {
+        const barHeight = (Number(value) / maxValue) * (height - 40);
+        const x = 20 + index * (barWidth + 12);
+        const y = height - barHeight - 20;
+        ctx.fillStyle = '#2563eb';
+        ctx.fillRect(x, y, barWidth, barHeight);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '11px Inter, sans-serif';
+        ctx.fillText(label, x, height - 6);
+      });
+    }
+
+    /**
+     * Dibuja un gráfico de tendencia con el histórico de movimientos.
+     */
+    function renderTrendChart(transactions) {
+      const { ctx, width, height } = prepareCanvas(trendChart);
+      ctx.clearRect(0, 0, width, height);
+
+      if (!transactions.length) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '14px Inter, sans-serif';
+        ctx.fillText('Sin datos para graficar.', 12, height / 2);
+        return;
+      }
+
+      const byDate = {};
+      transactions.forEach((transaction) => {
+        const date = transaction.transactionDate;
+        byDate[date] = (byDate[date] || 0) + Number(transaction.amount);
+      });
+
+      const dates = Object.keys(byDate).sort();
+      const values = dates.map((date) => byDate[date]);
+      const maxValue = Math.max(...values);
+      const minValue = Math.min(...values);
+      const range = maxValue - minValue || 1;
+
+      ctx.strokeStyle = '#1f3a8a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      dates.forEach((date, index) => {
+        const x = (index / (dates.length - 1 || 1)) * (width - 40) + 20;
+        const normalized = (byDate[date] - minValue) / range;
+        const y = height - 20 - normalized * (height - 40);
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.fillText(dates[0], 12, height - 6);
+      ctx.fillText(dates[dates.length - 1], width - 80, height - 6);
+    }
+
+    /**
+     * Carga las cuentas disponibles en el selector.
+     */
+    async function loadAccounts() {
+      try {
+        const response = await fetch('/app/api/accounts');
+        if (!response.ok) {
+          throw new Error('No se pudieron cargar las cuentas.');
+        }
+        const data = await response.json();
+        accountSelect.innerHTML = '';
+        data.forEach((account) => {
+          const option = document.createElement('option');
+          option.value = account.name;
+          option.textContent = `${account.name} (${account.currency})`;
+          option.dataset.currency = account.currency;
+          accountSelect.appendChild(option);
+        });
+        if (data.length) {
+          accountSelect.value = data[0].name;
+          currencySelect.value = data[0].currency;
+        } else {
+          const option = document.createElement('option');
+          option.value = '';
+          option.textContent = 'Sin cuentas registradas';
+          accountSelect.appendChild(option);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    /**
+     * Crea una cuenta nueva y refresca el selector.
+     */
+    async function createAccount() {
+      const name = newAccountName.value.trim();
+      if (!name) {
+        return;
+      }
+      const currency = newAccountCurrency.value;
+      createAccountButton.disabled = true;
+      try {
+        const response = await fetch('/app/api/accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, currency })
+        });
+        if (!response.ok) {
+          throw new Error('No se pudo crear la cuenta.');
+        }
+        newAccountName.value = '';
+        await loadAccounts();
+        await loadDashboardData();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        createAccountButton.disabled = false;
+      }
+    }
+
+    /**
+     * Lista los movimientos planificados por cuenta.
+     */
+    async function loadPlannedMovements() {
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        return;
+      }
+      try {
+        const response = await fetch(`/app/api/planned-movements?accountName=${encodeURIComponent(accountName)}`);
+        if (!response.ok) {
+          throw new Error('No se pudieron cargar los movimientos planificados.');
+        }
+        const data = await response.json();
+        plannedList.innerHTML = '';
+        if (!data.length) {
+          plannedList.innerHTML = '<div class="list-item muted">Sin movimientos registrados.</div>';
+          return;
+        }
+        data.forEach((movement) => {
+          const item = document.createElement('div');
+          item.className = 'list-item';
+          item.innerHTML = `
+            <strong>${movement.name}</strong> · ${movement.type} · ${formatCurrency(movement.amount)}
+            <div class="muted">Inicio: ${movement.startDate} · ${movement.periodicidad}</div>
+          `;
+          plannedList.appendChild(item);
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    /**
+     * Registra un movimiento planificado.
+     */
+    async function createPlannedMovement() {
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        return;
+      }
+      const payload = {
+        accountName,
+        name: plannedName.value.trim(),
+        amount: Number(plannedAmount.value || 0),
+        type: plannedType.value,
+        periodicidad: plannedPeriodicity.value,
+        startDate: plannedStartDate.value,
+        active: true
+      };
+      if (!payload.name || !payload.amount) {
+        return;
+      }
+      createPlannedButton.disabled = true;
+      try {
+        const response = await fetch('/app/api/planned-movements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          throw new Error('No se pudo registrar el movimiento planificado.');
+        }
+        plannedName.value = '';
+        plannedAmount.value = '';
+        await loadPlannedMovements();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        createPlannedButton.disabled = false;
+      }
+    }
+
+    /**
      * Construye el contexto para IA usando DTOs del backend.
      * Este método se integra con la API cuando esté disponible.
      */
     async function buildAiContext() {
-      const accountId = accountInput.value || 1;
+      const accountName = accountSelect.value;
       const type = categorySelect.value;
       const startDate = startDateInput.value;
       const endDate = endDateInput.value;
 
+      if (!accountName) {
+        return null;
+      }
+
       const contextPayload = {
-        accountId,
-        dateRange: { startDate, endDate },
+        accountName,
+        startDate,
+        endDate,
         categoryType: type,
-        // TODO: reemplazar por endpoint real que devuelva DTOs agregados.
         balance: null,
         totalsByCategory: null,
-        recentTransactions: []
+        recentTransactions: [],
+        plannedMovements: []
       };
 
       try {
         // TODO: implementar endpoint real en backend.
-        const response = await fetch(`/app/api/ai/context?accountId=${accountId}&startDate=${startDate}&endDate=${endDate}`);
+        const response = await fetch(`/app/api/ai/context?accountName=${encodeURIComponent(accountName)}&startDate=${startDate}&endDate=${endDate}&categoryType=${type}`);
         if (response.ok) {
           const data = await response.json();
           contextPayload.balance = data.balance;
-          contextPayload.totalsByCategory = data.totals;
-          contextPayload.recentTransactions = data.transactions || [];
+          contextPayload.totalsByCategory = data.totalsByCategory;
+          contextPayload.recentTransactions = data.recentTransactions || [];
+          contextPayload.plannedMovements = data.plannedMovements || [];
         }
       } catch (error) {
         console.warn('No se pudo construir el contexto de IA.', error);
@@ -502,7 +860,7 @@
         const response = await fetch('/app/api/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, context })
+          body: JSON.stringify({ sessionId: chatSessionId, message, context })
         });
 
         if (!response.ok) {
@@ -510,6 +868,7 @@
         }
 
         const data = await response.json();
+        chatSessionId = data.sessionId || chatSessionId;
         appendChatMessage({ sender: 'ai', message: data.reply || 'Respuesta pendiente.' });
       } catch (error) {
         appendChatMessage({ sender: 'ai', message: 'En espera de integración con el endpoint de IA.' });
@@ -524,16 +883,20 @@
      */
     async function loadDashboardData() {
       loadButton.disabled = true;
-      const accountId = accountInput.value || 1;
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        loadButton.disabled = false;
+        return;
+      }
       const type = categorySelect.value;
       const startDate = startDateInput.value;
       const endDate = endDateInput.value;
 
       try {
         const [balanceRes, totalsRes, transactionsRes] = await Promise.all([
-          fetch(`/app/api/accounts/${accountId}/balance`),
-          fetch(`/app/api/accounts/${accountId}/totals?type=${type}`),
-          fetch(`/app/api/accounts/${accountId}/transactions?startDate=${startDate}&endDate=${endDate}`)
+          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/balance`),
+          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/totals?type=${type}`),
+          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/transactions?startDate=${startDate}&endDate=${endDate}`)
         ]);
 
         if (!balanceRes.ok || !totalsRes.ok || !transactionsRes.ok) {
@@ -544,18 +907,22 @@
         const totalsData = await totalsRes.json();
         const transactionsData = await transactionsRes.json();
 
-        const totals = totalsData.totals || {};
+        const totals = totalsData.totals || totalsData.totalsByCategory || {};
         const totalIncome = Object.values(totals).reduce((acc, value) => acc + Number(value), 0);
 
         metricBalance.textContent = formatCurrency(balanceData.balance || 0);
-        metricIncome.textContent = formatCurrency(type === 'INCOME' ? totalIncome : 0);
-        metricExpenses.textContent = formatCurrency(type === 'EXPENSE' ? totalIncome : 0);
+        metricIncome.textContent = formatCurrency(type === 'INGRESO' ? totalIncome : 0);
+        metricExpenses.textContent = formatCurrency(type === 'GASTO' ? totalIncome : 0);
         renderTransactions(transactionsData.transactions || []);
+        renderTotalsChart(totals);
+        renderTrendChart(transactionsData.transactions || []);
       } catch (error) {
         metricBalance.textContent = '€ --';
         metricIncome.textContent = '€ --';
         metricExpenses.textContent = '€ --';
         renderTransactions([]);
+        renderTotalsChart({});
+        renderTrendChart([]);
         console.error(error);
       } finally {
         loadButton.disabled = false;
@@ -564,6 +931,21 @@
 
     loadButton.addEventListener('click', loadDashboardData);
     sendChatButton.addEventListener('click', sendChat);
+    createAccountButton.addEventListener('click', createAccount);
+    createPlannedButton.addEventListener('click', createPlannedMovement);
+    accountSelect.addEventListener('change', () => {
+      const selectedOption = accountSelect.selectedOptions[0];
+      if (selectedOption && selectedOption.dataset.currency) {
+        currencySelect.value = selectedOption.dataset.currency;
+      }
+      loadDashboardData();
+      loadPlannedMovements();
+    });
+
+    loadAccounts().then(() => {
+      loadDashboardData();
+      loadPlannedMovements();
+    });
   </script>
 </body>
 </html>
