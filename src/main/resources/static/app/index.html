@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finances App · Dashboard</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      --primary: #1f3a8a;
+      --primary-soft: #e0e7ff;
+      --bg: #f3f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #fff;
+      padding: 28px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    header .subtitle {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: #dbeafe;
+    }
+
+    header .actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    header button {
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: none;
+      background: #fff;
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    main {
+      padding: 32px 36px 48px;
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      align-items: stretch;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric span {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .metric strong {
+      font-size: 24px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button.primary:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 12px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status.ok {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .status.warn {
+      background: #fef3c7;
+      color: var(--warning);
+    }
+
+    .chat-window {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .chat-message {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+    }
+
+    .chat-message.ai {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+    }
+
+    .chat-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Cabecera principal de la aplicación empresarial -->
+  <header>
+    <div>
+      <h1>Finances App</h1>
+      <p class="subtitle">Centro de control financiero · Operación en tiempo real</p>
+    </div>
+    <div class="actions">
+      <button type="button">Descargar reporte</button>
+      <button type="button">Configurar alertas</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Resumen ejecutivo -->
+    <section class="grid grid-3">
+      <div class="card metric">
+        <span>Balance consolidado</span>
+        <strong id="metricBalance">€ --</strong>
+        <div class="tag" id="metricBalanceTrend">Actualizado</div>
+      </div>
+      <div class="card metric">
+        <span>Ingresos del mes</span>
+        <strong id="metricIncome">€ --</strong>
+        <div class="tag">Objetivo 98%</div>
+      </div>
+      <div class="card metric">
+        <span>Gastos críticos</span>
+        <strong id="metricExpenses">€ --</strong>
+        <div class="tag">Controlado</div>
+      </div>
+    </section>
+
+    <!-- Filtros y estado operativo -->
+    <section class="card">
+      <h2>Panel operativo</h2>
+      <div class="toolbar">
+        <div>
+          <label for="accountId">Cuenta</label>
+          <input id="accountId" type="number" min="1" value="1" />
+        </div>
+        <div>
+          <label for="categoryType">Tipo de categoría</label>
+          <select id="categoryType">
+            <option value="INCOME">Ingreso</option>
+            <option value="EXPENSE">Gasto</option>
+          </select>
+        </div>
+        <div>
+          <label for="startDate">Fecha inicio</label>
+          <input id="startDate" type="date" />
+        </div>
+        <div>
+          <label for="endDate">Fecha fin</label>
+          <input id="endDate" type="date" />
+        </div>
+        <div>
+          <label for="currency">Divisa</label>
+          <select id="currency">
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="MXN">MXN</option>
+          </select>
+        </div>
+        <div>
+          <button id="loadData" class="primary">Actualizar datos</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="grid grid-3">
+        <div>
+          <span class="muted">Estado de conciliación</span>
+          <div class="status ok" id="statusReconciliation">En línea</div>
+        </div>
+        <div>
+          <span class="muted">Alertas activas</span>
+          <div class="status warn" id="statusAlerts">3 pendientes</div>
+        </div>
+        <div>
+          <span class="muted">Último cierre</span>
+          <div class="status ok" id="statusClose">Hoy 09:30</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabla de acciones y chat IA -->
+    <section class="grid grid-2">
+      <div class="card">
+        <h2>Acciones prioritarias</h2>
+        <p class="muted">Listado de transacciones clave para análisis y seguimiento.</p>
+        <table aria-label="Tabla de acciones prioritarias">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Descripción</th>
+              <th>Categoría</th>
+              <th>Importe</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="transactionsTable">
+            <tr>
+              <td colspan="5" class="muted">Sin datos cargados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Asistente financiero (IA)</h2>
+        <p class="muted">Contexto unificado desde la base de datos para respuestas más precisas.</p>
+        <div class="chat-window" id="chatWindow">
+          <div class="chat-message ai">
+            <div class="chat-meta">IA · Contexto listo</div>
+            <div>Describe tu consulta y te ayudaremos con insights financieros.</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <label for="chatInput">Consulta</label>
+          <textarea id="chatInput" rows="3" placeholder="Ej: ¿Cómo impactan los gastos de marketing este mes?"></textarea>
+        </div>
+        <div style="margin-top: 12px;">
+          <button id="sendChat" class="primary">Enviar a IA</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Referencias principales de UI.
+    const accountInput = document.getElementById('accountId');
+    const categorySelect = document.getElementById('categoryType');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const currencySelect = document.getElementById('currency');
+    const loadButton = document.getElementById('loadData');
+    const metricBalance = document.getElementById('metricBalance');
+    const metricIncome = document.getElementById('metricIncome');
+    const metricExpenses = document.getElementById('metricExpenses');
+    const transactionsTable = document.getElementById('transactionsTable');
+    const chatWindow = document.getElementById('chatWindow');
+    const chatInput = document.getElementById('chatInput');
+    const sendChatButton = document.getElementById('sendChat');
+
+    const today = new Date().toISOString().slice(0, 10);
+    startDateInput.value = startDateInput.value || today;
+    endDateInput.value = endDateInput.value || today;
+
+    /**
+     * Formatea importes en la divisa seleccionada.
+     */
+    function formatCurrency(value) {
+      const currency = currencySelect.value || 'EUR';
+      return new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency
+      }).format(value);
+    }
+
+    /**
+     * Convierte transacciones en filas de la tabla principal.
+     */
+    function renderTransactions(transactions) {
+      transactionsTable.innerHTML = '';
+      if (!transactions.length) {
+        transactionsTable.innerHTML = '<tr><td colspan="5" class="muted">Sin transacciones.</td></tr>';
+        return;
+      }
+
+      transactions.forEach((item) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.transactionDate}</td>
+          <td>${item.description || 'Sin descripción'}</td>
+          <td>${item.categoryName} (${item.categoryType})</td>
+          <td>${formatCurrency(item.amount)}</td>
+          <td><span class="status ok">Revisado</span></td>
+        `;
+        transactionsTable.appendChild(row);
+      });
+    }
+
+    /**
+     * Inserta un mensaje en el chat.
+     */
+    function appendChatMessage({ sender, message }) {
+      const container = document.createElement('div');
+      container.className = `chat-message ${sender === 'ai' ? 'ai' : ''}`;
+      container.innerHTML = `
+        <div class="chat-meta">${sender === 'ai' ? 'IA' : 'Usuario'}</div>
+        <div>${message}</div>
+      `;
+      chatWindow.appendChild(container);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    /**
+     * Construye el contexto para IA usando DTOs del backend.
+     * Este método se integra con la API cuando esté disponible.
+     */
+    async function buildAiContext() {
+      const accountId = accountInput.value || 1;
+      const type = categorySelect.value;
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      const contextPayload = {
+        accountId,
+        dateRange: { startDate, endDate },
+        categoryType: type,
+        // TODO: reemplazar por endpoint real que devuelva DTOs agregados.
+        balance: null,
+        totalsByCategory: null,
+        recentTransactions: []
+      };
+
+      try {
+        // TODO: implementar endpoint real en backend.
+        const response = await fetch(`/app/api/ai/context?accountId=${accountId}&startDate=${startDate}&endDate=${endDate}`);
+        if (response.ok) {
+          const data = await response.json();
+          contextPayload.balance = data.balance;
+          contextPayload.totalsByCategory = data.totals;
+          contextPayload.recentTransactions = data.transactions || [];
+        }
+      } catch (error) {
+        console.warn('No se pudo construir el contexto de IA.', error);
+      }
+
+      return contextPayload;
+    }
+
+    /**
+     * Dispara la consulta a la IA con el contexto necesario.
+     */
+    async function sendChat() {
+      const message = chatInput.value.trim();
+      if (!message) {
+        return;
+      }
+
+      sendChatButton.disabled = true;
+      appendChatMessage({ sender: 'user', message });
+      chatInput.value = '';
+
+      try {
+        const context = await buildAiContext();
+
+        // TODO: reemplazar por endpoint real de IA.
+        const response = await fetch('/app/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, context })
+        });
+
+        if (!response.ok) {
+          throw new Error('No se pudo contactar al asistente IA.');
+        }
+
+        const data = await response.json();
+        appendChatMessage({ sender: 'ai', message: data.reply || 'Respuesta pendiente.' });
+      } catch (error) {
+        appendChatMessage({ sender: 'ai', message: 'En espera de integración con el endpoint de IA.' });
+        console.error(error);
+      } finally {
+        sendChatButton.disabled = false;
+      }
+    }
+
+    /**
+     * Carga los indicadores principales desde el backend.
+     */
+    async function loadDashboardData() {
+      loadButton.disabled = true;
+      const accountId = accountInput.value || 1;
+      const type = categorySelect.value;
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      try {
+        const [balanceRes, totalsRes, transactionsRes] = await Promise.all([
+          fetch(`/app/api/accounts/${accountId}/balance`),
+          fetch(`/app/api/accounts/${accountId}/totals?type=${type}`),
+          fetch(`/app/api/accounts/${accountId}/transactions?startDate=${startDate}&endDate=${endDate}`)
+        ]);
+
+        if (!balanceRes.ok || !totalsRes.ok || !transactionsRes.ok) {
+          throw new Error('No se pudieron cargar los datos del dashboard.');
+        }
+
+        const balanceData = await balanceRes.json();
+        const totalsData = await totalsRes.json();
+        const transactionsData = await transactionsRes.json();
+
+        const totals = totalsData.totals || {};
+        const totalIncome = Object.values(totals).reduce((acc, value) => acc + Number(value), 0);
+
+        metricBalance.textContent = formatCurrency(balanceData.balance || 0);
+        metricIncome.textContent = formatCurrency(type === 'INCOME' ? totalIncome : 0);
+        metricExpenses.textContent = formatCurrency(type === 'EXPENSE' ? totalIncome : 0);
+        renderTransactions(transactionsData.transactions || []);
+      } catch (error) {
+        metricBalance.textContent = '€ --';
+        metricIncome.textContent = '€ --';
+        metricExpenses.textContent = '€ --';
+        renderTransactions([]);
+        console.error(error);
+      } finally {
+        loadButton.disabled = false;
+      }
+    }
+
+    loadButton.addEventListener('click', loadDashboardData);
+    sendChatButton.addEventListener('click', sendChat);
+  </script>
+</body>
+</html>
