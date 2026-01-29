@@ -1,6 +1,7 @@
 package com.finances.main.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -63,5 +64,48 @@ class AppApiControllerIntegrationTest {
         JsonNode listNode = objectMapper.readTree(listResult.getResponse().getContentAsString());
         assertThat(listNode.isArray()).isTrue();
         assertThat(listNode.size()).isEqualTo(1);
+    }
+
+    @Test
+    void createAndDeleteTransactionFlow() throws Exception {
+        String accountPayload = """
+            {"name":"Cuenta movimientos","currency":"EUR"}
+            """;
+
+        mockMvc.perform(post("/app/api/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(accountPayload))
+            .andExpect(status().isCreated());
+
+        LocalDate today = LocalDate.now();
+        String transactionPayload = String.format(
+            """
+                {"accountName":"Cuenta movimientos","categoryName":"Venta","categoryType":"INGRESO",
+                 "amount":100.00,"transactionDate":"%s","description":"Cobro cliente"}
+                """,
+            today
+        );
+
+        MvcResult transactionResult = mockMvc.perform(post("/app/api/transactions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(transactionPayload))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+        JsonNode transactionNode = objectMapper.readTree(transactionResult.getResponse().getContentAsString());
+        long transactionId = transactionNode.get("id").asLong();
+
+        mockMvc.perform(delete("/app/api/transactions/{transactionId}", transactionId))
+            .andExpect(status().isNoContent());
+
+        LocalDate startDate = today.withDayOfMonth(1);
+        MvcResult listResult = mockMvc.perform(get("/app/api/accounts/by-name/{accountName}/transactions", "Cuenta movimientos")
+                .param("startDate", startDate.toString())
+                .param("endDate", today.toString()))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        JsonNode listNode = objectMapper.readTree(listResult.getResponse().getContentAsString());
+        assertThat(listNode.get("transactions").isEmpty()).isTrue();
     }
 }
