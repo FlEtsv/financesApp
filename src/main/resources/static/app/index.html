@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finances App</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f7fb;
+      color: #1d2330;
+    }
+
+    header {
+      background: #1d4ed8;
+      color: #fff;
+      padding: 24px 32px;
+    }
+
+    main {
+      padding: 32px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    button {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d0d7e2;
+      font-size: 14px;
+    }
+
+    button {
+      background: #1d4ed8;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .result {
+      background: #f1f5f9;
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .transactions {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .transactions li {
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .transactions li:last-child {
+      border-bottom: none;
+    }
+
+    .muted {
+      color: #64748b;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Cabecera principal de la interfaz web -->
+  <header>
+    <h1>Finances App</h1>
+    <p class="muted">Panel básico para consultar balances y movimientos.</p>
+  </header>
+
+  <main>
+    <!-- Formulario de consulta del libro mayor -->
+    <section class="card">
+      <h2>Consultar cuenta</h2>
+      <div class="grid">
+        <div>
+          <label for="accountId">ID de cuenta</label>
+          <input id="accountId" type="number" min="1" value="1" />
+        </div>
+        <div>
+          <label for="categoryType">Tipo de categoría</label>
+          <select id="categoryType">
+            <option value="INCOME">Ingreso</option>
+            <option value="EXPENSE">Gasto</option>
+          </select>
+        </div>
+        <div>
+          <label for="startDate">Fecha inicio</label>
+          <input id="startDate" type="date" />
+        </div>
+        <div>
+          <label for="endDate">Fecha fin</label>
+          <input id="endDate" type="date" />
+        </div>
+      </div>
+      <div style="margin-top: 16px;">
+        <button id="loadData">Consultar</button>
+      </div>
+    </section>
+
+    <!-- Resultados -->
+    <section class="card">
+      <h2>Resultados</h2>
+      <div class="grid">
+        <div class="result">
+          <strong>Balance</strong>
+          <p id="balanceValue" class="muted">--</p>
+        </div>
+        <div class="result">
+          <strong>Totales por categoría</strong>
+          <div id="totalsValue" class="muted">--</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Transacciones</h2>
+      <ul id="transactions" class="transactions"></ul>
+    </section>
+  </main>
+
+  <script>
+    // Conexión simple con los endpoints /app/api
+    const accountInput = document.getElementById('accountId');
+    const categorySelect = document.getElementById('categoryType');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const loadButton = document.getElementById('loadData');
+    const balanceValue = document.getElementById('balanceValue');
+    const totalsValue = document.getElementById('totalsValue');
+    const transactionsList = document.getElementById('transactions');
+
+    const today = new Date().toISOString().slice(0, 10);
+    startDateInput.value = startDateInput.value || today;
+    endDateInput.value = endDateInput.value || today;
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR'
+      }).format(value);
+    }
+
+    function renderTotals(totals) {
+      const entries = Object.entries(totals || {});
+      if (!entries.length) {
+        totalsValue.textContent = 'Sin datos.';
+        return;
+      }
+      totalsValue.innerHTML = entries
+        .map(([name, amount]) => `<div>${name}: ${formatCurrency(amount)}</div>`)
+        .join('');
+    }
+
+    function renderTransactions(transactions) {
+      transactionsList.innerHTML = '';
+      if (!transactions.length) {
+        transactionsList.innerHTML = '<li class="muted">Sin transacciones.</li>';
+        return;
+      }
+      transactions.forEach((item) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${item.description || 'Sin descripción'}</strong>
+          <span class="muted">${item.transactionDate} · ${item.categoryName} (${item.categoryType})</span>
+          <span>${formatCurrency(item.amount)}</span>
+        `;
+        transactionsList.appendChild(li);
+      });
+    }
+
+    async function loadData() {
+      loadButton.disabled = true;
+      const accountId = accountInput.value || 1;
+      const type = categorySelect.value;
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      try {
+        const [balanceRes, totalsRes, transactionsRes] = await Promise.all([
+          fetch(`/app/api/accounts/${accountId}/balance`),
+          fetch(`/app/api/accounts/${accountId}/totals?type=${type}`),
+          fetch(`/app/api/accounts/${accountId}/transactions?startDate=${startDate}&endDate=${endDate}`)
+        ]);
+
+        if (!balanceRes.ok || !totalsRes.ok || !transactionsRes.ok) {
+          throw new Error('No se pudieron cargar los datos.');
+        }
+
+        const balanceData = await balanceRes.json();
+        const totalsData = await totalsRes.json();
+        const transactionsData = await transactionsRes.json();
+
+        balanceValue.textContent = formatCurrency(balanceData.balance || 0);
+        renderTotals(totalsData.totals);
+        renderTransactions(transactionsData.transactions || []);
+      } catch (error) {
+        balanceValue.textContent = 'Error al cargar balance.';
+        totalsValue.textContent = 'Error al cargar totales.';
+        transactionsList.innerHTML = '<li class="muted">Error al cargar transacciones.</li>';
+        console.error(error);
+      } finally {
+        loadButton.disabled = false;
+      }
+    }
+
+    loadButton.addEventListener('click', () => {
+      loadData();
+    });
+  </script>
+</body>
+</html>
