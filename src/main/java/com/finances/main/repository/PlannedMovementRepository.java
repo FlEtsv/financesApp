@@ -3,6 +3,8 @@ package com.finances.main.repository;
 import com.finances.main.model.PlannedMovement;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Acceso a datos de movimientos planificados.
@@ -11,5 +13,14 @@ public interface PlannedMovementRepository extends JpaRepository<PlannedMovement
     /**
      * Obtiene movimientos planificados por nombre de cuenta.
      */
-    List<PlannedMovement> findByAccountNameIgnoreCaseOrderByStartDateDesc(String accountName);
+    @Query("""
+        select movement
+        from PlannedMovement movement
+        join fetch movement.account account
+        where lower(account.name) = lower(:accountName)
+        order by movement.startDate desc
+        """)
+    List<PlannedMovement> findByAccountNameIgnoreCaseOrderByStartDateDesc(
+        @Param("accountName") String accountName
+    );
 }
