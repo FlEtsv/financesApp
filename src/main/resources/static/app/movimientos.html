@@ -112,6 +112,22 @@
       cursor: pointer;
     }
 
+    button.danger {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button.danger:disabled,
+    button.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -148,6 +164,10 @@
     .muted {
       color: var(--muted);
       font-size: 13px;
+    }
+
+    .actions-cell {
+      text-align: right;
     }
   </style>
 </head>
@@ -220,11 +240,12 @@
             <th>Categoría</th>
             <th>Importe</th>
             <th>Estado</th>
+            <th class="actions-cell">Acciones</th>
           </tr>
         </thead>
         <tbody id="transactionsTable">
           <tr>
-            <td colspan="5" class="muted">Sin movimientos.</td>
+            <td colspan="6" class="muted">Sin movimientos.</td>
           </tr>
         </tbody>
       </table>
@@ -278,6 +299,94 @@
         option.textContent = `${goal.name} · ${goal.currentAmount}/${goal.targetAmount}`;
         goalSelect.appendChild(option);
       });
+    }
+
+    /**
+     * Elimina una transacción registrada usando el servicio backend.
+     */
+    async function deleteTransaction(transactionId) {
+      if (!transactionId) {
+        return;
+      }
+
+      const confirmDelete = window.confirm('¿Deseas eliminar este movimiento?');
+      if (!confirmDelete) {
+        return;
+      }
+
+      transactionStatus.textContent = 'Eliminando movimiento...';
+      try {
+        const response = await fetch(`/app/api/transactions/${transactionId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) {
+          throw new Error('No se pudo eliminar el movimiento.');
+        }
+
+        transactionStatus.textContent = 'Movimiento eliminado correctamente.';
+        await loadTransactions();
+        await loadGoals();
+      } catch (error) {
+        transactionStatus.textContent = 'No se pudo eliminar el movimiento.';
+        console.error(error);
+      }
+    }
+
+    /**
+     * Crea una celda de tabla con texto seguro.
+     */
+    function createTextCell(text) {
+      const cell = document.createElement('td');
+      cell.textContent = text;
+      return cell;
+    }
+
+    /**
+     * Crea la celda de estado con estilos.
+     */
+    function createStatusCell() {
+      const cell = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = 'status';
+      badge.textContent = 'Confirmado';
+      cell.appendChild(badge);
+      return cell;
+    }
+
+    /**
+     * Crea la celda de acciones con el botón de eliminar.
+     */
+    function createActionsCell(transactionId) {
+      const cell = document.createElement('td');
+      cell.className = 'actions-cell';
+      const button = document.createElement('button');
+      button.className = 'danger';
+      button.type = 'button';
+      button.textContent = 'Eliminar';
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        await deleteTransaction(transactionId);
+        button.disabled = false;
+      });
+      cell.appendChild(button);
+      return cell;
+    }
+
+    /**
+     * Crea una fila completa para la tabla de movimientos.
+     */
+    function createTransactionRow(transaction) {
+      const row = document.createElement('tr');
+      row.appendChild(createTextCell(transaction.transactionDate));
+      row.appendChild(createTextCell(transaction.description || 'Sin descripción'));
+      row.appendChild(
+        createTextCell(`${transaction.categoryName} (${transaction.categoryType})`)
+      );
+      row.appendChild(createTextCell(transaction.amount));
+      row.appendChild(createStatusCell());
+      row.appendChild(createActionsCell(transaction.id));
+      return row;
     }
 
     /**
@@ -352,20 +461,12 @@
 
       transactionsTable.innerHTML = '';
       if (!data.transactions.length) {
-        transactionsTable.innerHTML = '<tr><td colspan="5" class="muted">Sin movimientos.</td></tr>';
+        transactionsTable.innerHTML = '<tr><td colspan="6" class="muted">Sin movimientos.</td></tr>';
         return;
       }
 
       data.transactions.forEach((transaction) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${transaction.transactionDate}</td>
-          <td>${transaction.description || 'Sin descripción'}</td>
-          <td>${transaction.categoryName} (${transaction.categoryType})</td>
-          <td>${transaction.amount}</td>
-          <td><span class="status">Confirmado</span></td>
-        `;
-        transactionsTable.appendChild(row);
+        transactionsTable.appendChild(createTransactionRow(transaction));
       });
     }
 
