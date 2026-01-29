@@ -30,5 +30,6 @@ Variables de entorno recomendadas:
 - `DB_PASSWORD`
 - `DB_DDL_AUTO` (`update`, `validate`, etc.)
 
+Diseñado para el uso de la IA como coaching se sonecta a FlEtsv/apiasistente
 ## Docker
 Consulta la guía de despliegue en [docs/DOCKER.md](docs/DOCKER.md).
