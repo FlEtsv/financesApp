@@ -25,8 +25,8 @@ public class LedgerServiceImpl implements LedgerService {
 
     @Override
     public BigDecimal calculateBalance(Long accountId) {
-        BigDecimal income = transactionRepository.sumByAccountAndCategoryType(accountId, CategoryType.INCOME);
-        BigDecimal expense = transactionRepository.sumByAccountAndCategoryType(accountId, CategoryType.EXPENSE);
+        BigDecimal income = transactionRepository.sumByAccountAndCategoryType(accountId, CategoryType.INGRESO);
+        BigDecimal expense = transactionRepository.sumByAccountAndCategoryType(accountId, CategoryType.GASTO);
         return income.subtract(expense);
     }
 
@@ -47,3 +47,5 @@ public class LedgerServiceImpl implements LedgerService {
         return transactionRepository.findByAccountAndDateRange(accountId, startDate, endDate);
     }
 }
+
+(fix) commit "resolve conflict"
