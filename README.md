@@ -5,7 +5,7 @@ Aplicación Spring Boot para gestionar un libro mayor con endpoints REST y una i
 ## Estructura rápida
 - `src/main/java/com/finances/main/web`: controladores y DTOs web.
 - `src/main/resources/static/app`: interfaz web básica (HTML/JS).
-- `docs/`: documentación operativa (API y Docker).
+- `docs/`: documentación operativa (API, Docker y base de datos).
 
 ## Endpoints principales
 - **UI**: `GET /app` (interfaz web básica).
@@ -15,6 +15,9 @@ Aplicación Spring Boot para gestionar un libro mayor con endpoints REST y una i
 - **API ledger**: `GET /api/ledger/...` (endpoints originales).
 
 Consulta más detalles en [docs/API.md](docs/API.md).
+
+## Base de datos
+Consulta el script SQL en [docs/DB.md](docs/DB.md).
 
 ## Ejecución local
 ```bash
