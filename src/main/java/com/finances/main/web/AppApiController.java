@@ -20,19 +20,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * API REST para exponer datos del libro mayor a clientes web.
+ * Endpoints /app/api para consumo de la interfaz web básica.
  */
 @RestController
-@RequestMapping("/api/ledger")
-public class LedgerController {
+@RequestMapping("/app/api")
+public class AppApiController {
     private final LedgerService ledgerService;
 
-    public LedgerController(LedgerService ledgerService) {
+    public AppApiController(LedgerService ledgerService) {
         this.ledgerService = ledgerService;
     }
 
     /**
-     * Devuelve el balance de una cuenta.
+     * Devuelve el balance de una cuenta para la interfaz web.
      */
     @GetMapping("/accounts/{accountId}/balance")
     public BalanceResponse getBalance(@PathVariable Long accountId) {
@@ -41,7 +41,7 @@ public class LedgerController {
     }
 
     /**
-     * Devuelve totales agrupados por categoría.
+     * Devuelve totales agrupados por categoría para la interfaz web.
      */
     @GetMapping("/accounts/{accountId}/totals")
     public CategoryTotalsResponse getTotalsByCategory(
@@ -53,7 +53,7 @@ public class LedgerController {
     }
 
     /**
-     * Devuelve transacciones en un rango de fechas.
+     * Devuelve transacciones en un rango de fechas para la interfaz web.
      */
     @GetMapping("/accounts/{accountId}/transactions")
     public TransactionsResponse getTransactions(
