@@ -387,6 +387,7 @@
       <div class="grid-form">
         <div>
           <label for="initialBalanceInput">Saldo inicial</label>
+          <select id="accountNameInitialBalance"></select>
           <input id="initialBalanceInput" type="number" step="0.01" placeholder="Ej: 1250.00" />
         </div>
         <div style="align-self: end;">
@@ -594,6 +595,8 @@
     const plannedStartDate = document.getElementById('plannedStartDate');
     const createPlannedButton = document.getElementById('createPlanned');
     const plannedList = document.getElementById('plannedList');
+    const accountInitialBalanceSelect =
+            document.getElementById('accountNameInitialBalance');
 
     let chatSessionId = '';
 
@@ -752,13 +755,19 @@
         }
         const data = await response.json();
         accountSelect.innerHTML = '';
+        accountInitialBalanceSelect.innerHTML = '';
+
         data.forEach((account) => {
-          const option = document.createElement('option');
-          option.value = account.name;
-          option.textContent = `${account.name} (${account.currency})`;
-          option.dataset.currency = account.currency;
-          option.dataset.initialBalance = account.initialBalance || 0;
-          accountSelect.appendChild(option);
+          const optionMain = document.createElement('option');
+          optionMain.value = account.name;
+          optionMain.textContent = `${account.name} (${account.currency})`;
+          optionMain.dataset.currency = account.currency;
+          accountSelect.appendChild(optionMain);
+
+          const optionBalance = document.createElement('option');
+          optionBalance.value = account.name;
+          optionBalance.textContent = account.name;
+          accountInitialBalanceSelect.appendChild(optionBalance);
         });
         if (data.length) {
           accountSelect.value = data[0].name;
@@ -884,30 +893,39 @@
      * Actualiza el saldo inicial en la cuenta seleccionada.
      */
     async function updateInitialBalance() {
-      const accountName = accountSelect.value;
-      if (!accountName) {
-        return;
-      }
-      updateInitialBalanceButton.disabled = true;
+      const accountName = accountInitialBalanceSelect.value;
+      if (!accountName) return;
+
       const initialBalance = Number(initialBalanceInput.value || 0);
+      updateInitialBalanceButton.disabled = true;
+
       try {
-        const response = await fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/initial-balance`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ initialBalance })
-        });
+        const response = await fetch(
+                `/app/api/accounts/by-name/${encodeURIComponent(accountName)}/initial-balance`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ initialBalance })
+                }
+        );
+
         if (!response.ok) {
           throw new Error('No se pudo actualizar el saldo.');
         }
-        initialBalanceStatus.textContent = 'Saldo actualizado correctamente.';
+
+        initialBalanceStatus.textContent =
+                `Saldo actualizado para ${accountName}.`;
+
+        await loadAccounts();
         await loadDashboardData();
       } catch (error) {
-        initialBalanceStatus.textContent = 'No se pudo actualizar el saldo.';
+        initialBalanceStatus.textContent = 'Error al actualizar saldo.';
         console.error(error);
       } finally {
         updateInitialBalanceButton.disabled = false;
       }
     }
+
 
     /**
      * Construye el contexto para IA usando DTOs del backend.
@@ -1053,6 +1071,19 @@
         loadButton.disabled = false;
       }
     }
+
+
+    accountInitialBalanceSelect.addEventListener('change', () => {
+      const selected = accountInitialBalanceSelect.value;
+      const account = [...accountSelect.options]
+              .find(opt => opt.value === selected);
+
+      if (account?.dataset?.initialBalance) {
+        initialBalanceInput.value = account.dataset.initialBalance;
+        initialBalanceStatus.textContent =
+                'Saldo cargado desde la cuenta seleccionada.';
+      }
+    });
 
     loadButton.addEventListener('click', loadDashboardData);
     sendChatButton.addEventListener('click', sendChat);
