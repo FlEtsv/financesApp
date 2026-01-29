@@ -48,4 +48,3 @@ public class LedgerServiceImpl implements LedgerService {
     }
 }
 
-(fix) commit "resolve conflict"
