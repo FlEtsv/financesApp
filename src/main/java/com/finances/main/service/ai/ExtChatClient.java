@@ -36,12 +36,19 @@ public class ExtChatClient {
                 .body(request)
                 .retrieve()
                 .body(AiChatResponse.class);
-            if (response == null) {
+            if (!isValidResponse(response)) {
                 return fallbackService.generateReply(request);
             }
             return response;
         } catch (RestClientException ex) {
             return fallbackService.generateReply(request);
         }
+    }
+
+    /**
+     * Valida que la respuesta externa tenga un payload utilizable.
+     */
+    private boolean isValidResponse(AiChatResponse response) {
+        return response != null && response.reply() != null && !response.reply().isBlank();
     }
 }
