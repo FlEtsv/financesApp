@@ -17,8 +17,9 @@ class AiChatServiceTest {
     void generateReplyUsesContextAndCreatesSessionId() {
         AiProperties properties = new AiProperties();
         properties.setSystemPrompt("Prompt inicial");
-        AiPromptBuilder promptBuilder = new AiPromptBuilder(properties);
-        AiChatService chatService = new AiChatService(promptBuilder);
+        AiChatRequestNormalizer normalizer = new AiChatRequestNormalizer();
+        AiPromptBuilder promptBuilder = new AiPromptBuilder(properties, normalizer);
+        AiChatService chatService = new AiChatService(promptBuilder, normalizer);
 
         AiContextResponse context = new AiContextResponse(
             "Cuenta principal",
@@ -36,5 +37,6 @@ class AiChatServiceTest {
 
         assertThat(response.sessionId()).isNotBlank();
         assertThat(response.reply()).contains("Cuenta principal");
+        assertThat(response.reply()).contains("¿Cuál es el balance?");
     }
 }
