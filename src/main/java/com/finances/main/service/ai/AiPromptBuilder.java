@@ -33,6 +33,7 @@ public class AiPromptBuilder {
             addLineIfPresent(joiner, formatContextLine("Movimientos recientes", request.context().recentTransactions()));
             addLineIfPresent(joiner, formatContextLine("Movimientos planificados", request.context().plannedMovements()));
         }
+        System.out.println(joiner);
         return joiner.toString();
     }
 

@@ -9,6 +9,7 @@ import com.finances.main.service.FinancialGoalService;
 import com.finances.main.service.LedgerService;
 import com.finances.main.service.PlannedMovementService;
 import com.finances.main.service.TransactionService;
+import com.finances.main.service.ai.AiContextService;
 import com.finances.main.service.ai.ExtChatClient;
 import com.finances.main.web.dto.AccountDtos.AccountBalanceUpdateRequest;
 import com.finances.main.web.dto.AccountDtos.AccountCreateRequest;
@@ -66,15 +67,16 @@ public class AppApiController {
     private final FinancialGoalService financialGoalService;
     private final BudgetService budgetService;
     private final ExtChatClient extChatClient;
+    private final AiContextService aiContextService;
 
     public AppApiController(
-        LedgerService ledgerService,
-        AccountService accountService,
-        PlannedMovementService plannedMovementService,
-        TransactionService transactionService,
-        FinancialGoalService financialGoalService,
-        BudgetService budgetService,
-        ExtChatClient extChatClient
+            LedgerService ledgerService,
+            AccountService accountService,
+            PlannedMovementService plannedMovementService,
+            TransactionService transactionService,
+            FinancialGoalService financialGoalService,
+            BudgetService budgetService,
+            ExtChatClient extChatClient, AiContextService aiContextService
     ) {
         this.ledgerService = ledgerService;
         this.accountService = accountService;
@@ -83,6 +85,7 @@ public class AppApiController {
         this.financialGoalService = financialGoalService;
         this.budgetService = budgetService;
         this.extChatClient = extChatClient;
+        this.aiContextService = aiContextService;
     }
 
     /**
@@ -422,33 +425,7 @@ public class AppApiController {
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
         @RequestParam CategoryType categoryType
     ) {
-        BigDecimal balance = ledgerService.calculateBalance(accountName);
-        Map<String, BigDecimal> totals = ledgerService.totalsByCategory(accountName, categoryType);
-        List<TransactionSummary> transactions = ledgerService.listTransactions(accountName, startDate, endDate)
-            .stream()
-            .map(this::toSummary)
-            .collect(Collectors.toList());
-        List<PlannedMovementSummary> plannedMovements = plannedMovementService.listByAccountName(accountName)
-            .stream()
-            .map(movement -> new PlannedMovementSummary(
-                movement.getName(),
-                movement.getType(),
-                movement.getAmount(),
-                movement.getStartDate(),
-                movement.isActive()
-            ))
-            .collect(Collectors.toList());
-
-        return new AiContextResponse(
-            accountName,
-            startDate,
-            endDate,
-            categoryType,
-            balance,
-            totals,
-            transactions,
-            plannedMovements
-        );
+        return aiContextService.buildContext(accountName, startDate, endDate, categoryType);
     }
 
     /**
@@ -456,30 +433,32 @@ public class AppApiController {
      */
     @PostMapping("/ai/chat")
     public AiChatResponse chatWithAi(@RequestBody AiChatRequest request) {
-        return extChatClient.sendChat(request);
+        AiChatRequest enrichedRequest = aiContextService.enrichChatRequest(request);
+        return extChatClient.sendChat(enrichedRequest);
     }
+
 
     private TransactionSummary toSummary(Transaction transaction) {
         return new TransactionSummary(
-            transaction.getId(),
-            transaction.getAmount(),
-            transaction.getTransactionDate(),
-            transaction.getDescription(),
-            transaction.getCategory().getName(),
-            transaction.getCategory().getType()
+                transaction.getId(),
+                transaction.getAmount(),
+                transaction.getTransactionDate(),
+                transaction.getDescription(),
+                transaction.getCategory().getName(),
+                transaction.getCategory().getType()
         );
     }
 
     private PlannedMovementResponse toMovementResponse(PlannedMovement movement) {
         return new PlannedMovementResponse(
-            movement.getId(),
-            movement.getAccount().getName(),
-            movement.getName(),
-            movement.getAmount(),
-            movement.getType(),
-            movement.getPeriodicidad(),
-            movement.getStartDate(),
-            movement.isActive()
+                movement.getId(),
+                movement.getAccount().getName(),
+                movement.getName(),
+                movement.getAmount(),
+                movement.getType(),
+                movement.getPeriodicidad(),
+                movement.getStartDate(),
+                movement.isActive()
         );
     }
 }
