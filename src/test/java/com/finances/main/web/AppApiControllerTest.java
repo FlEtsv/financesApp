@@ -69,20 +69,20 @@ class AppApiControllerTest {
 
     @Test
     void returnsTotalsForApp() throws Exception {
-        when(ledgerService.totalsByCategory(10L, CategoryType.INCOME))
+        when(ledgerService.totalsByCategory(10L, CategoryType.INGRESO))
             .thenReturn(Map.of("Ventas", new BigDecimal("3000.00")));
 
         mockMvc.perform(get("/app/api/accounts/10/totals")
-                .param("type", "INCOME"))
+                .param("type", "INGRESO"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.type").value("INCOME"))
+            .andExpect(jsonPath("$.type").value("INGRESO"))
             .andExpect(jsonPath("$.totals.Ventas").value(3000.00));
     }
 
     @Test
     void returnsTransactionsForApp() throws Exception {
         Account account = new Account("Cuenta", "EUR");
-        Category category = new Category("Servicios", CategoryType.EXPENSE);
+        Category category = new Category("Servicios", CategoryType.GASTO);
         Transaction transaction = new Transaction(
             account,
             category,
@@ -100,7 +100,7 @@ class AppApiControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.transactions[0].amount").value(99.99))
             .andExpect(jsonPath("$.transactions[0].categoryName").value("Servicios"))
-            .andExpect(jsonPath("$.transactions[0].categoryType").value("EXPENSE"));
+            .andExpect(jsonPath("$.transactions[0].categoryType").value("GASTO"));
     }
 
     @Test

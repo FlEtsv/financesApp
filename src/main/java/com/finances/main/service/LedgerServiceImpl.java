@@ -44,25 +44,13 @@ public class LedgerServiceImpl implements LedgerService {
     @Override
     public Map<String, BigDecimal> totalsByCategory(Long accountId, CategoryType type) {
         List<Object[]> rows = transactionRepository.totalsByCategory(accountId, type);
-        Map<String, BigDecimal> totals = new HashMap<>();
-        for (Object[] row : rows) {
-            String category = (String) row[0];
-            BigDecimal amount = (BigDecimal) row[1];
-            totals.put(category, amount);
-        }
-        return totals;
+        return mapTotals(rows);
     }
 
     @Override
     public Map<String, BigDecimal> totalsByCategory(String accountName, CategoryType type) {
         List<Object[]> rows = transactionRepository.totalsByCategoryAndAccountName(accountName, type);
-        Map<String, BigDecimal> totals = new HashMap<>();
-        for (Object[] row : rows) {
-            String category = (String) row[0];
-            BigDecimal amount = (BigDecimal) row[1];
-            totals.put(category, amount);
-        }
-        return totals;
+        return mapTotals(rows);
     }
 
     @Override
@@ -85,5 +73,18 @@ public class LedgerServiceImpl implements LedgerService {
         return accountRepository.findByNameIgnoreCase(accountName)
             .map(Account::getInitialBalance)
             .orElse(BigDecimal.ZERO);
+    }
+
+    /**
+     * Convierte filas agregadas en un mapa de totales por categoría.
+     */
+    private Map<String, BigDecimal> mapTotals(List<Object[]> rows) {
+        Map<String, BigDecimal> totals = new HashMap<>();
+        for (Object[] row : rows) {
+            String category = (String) row[0];
+            BigDecimal amount = (BigDecimal) row[1];
+            totals.put(category, amount);
+        }
+        return totals;
     }
 }
