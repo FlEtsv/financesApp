@@ -43,20 +43,20 @@ class LedgerControllerTest {
 
     @Test
     void returnsTotalsByCategory() throws Exception {
-        when(ledgerService.totalsByCategory(1L, CategoryType.EXPENSE))
+        when(ledgerService.totalsByCategory(1L, CategoryType.GASTO))
             .thenReturn(Map.of("Renta", new BigDecimal("800.00")));
 
         mockMvc.perform(get("/api/ledger/accounts/1/totals")
-                .param("type", "EXPENSE"))
+                .param("type", "GASTO"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.type").value("EXPENSE"))
+            .andExpect(jsonPath("$.type").value("GASTO"))
             .andExpect(jsonPath("$.totals.Renta").value(800.00));
     }
 
     @Test
     void returnsTransactions() throws Exception {
         Account account = new Account("Cuenta", "USD");
-        Category category = new Category("Salario", CategoryType.INCOME);
+        Category category = new Category("Salario", CategoryType.INGRESO);
         Transaction transaction = new Transaction(
             account,
             category,
@@ -74,6 +74,6 @@ class LedgerControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.transactions[0].amount").value(1200.00))
             .andExpect(jsonPath("$.transactions[0].categoryName").value("Salario"))
-            .andExpect(jsonPath("$.transactions[0].categoryType").value("INCOME"));
+            .andExpect(jsonPath("$.transactions[0].categoryType").value("INGRESO"));
     }
 }

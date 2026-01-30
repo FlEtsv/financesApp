@@ -30,7 +30,7 @@ class TransactionRepositoryTest {
     @Test
     void findsTransactionsByDateRange() {
         Account account = accountRepository.save(new Account("Cuenta Principal", "USD"));
-        Category income = categoryRepository.save(new Category("Salario", CategoryType.INCOME));
+        Category income = categoryRepository.save(new Category("Salario", CategoryType.INGRESO));
 
         Transaction january = new Transaction(account, income, new BigDecimal("1000.00"), LocalDate.of(2024, 1, 5), "Pago 1");
         Transaction february = new Transaction(account, income, new BigDecimal("1000.00"), LocalDate.of(2024, 2, 5), "Pago 2");
@@ -49,14 +49,14 @@ class TransactionRepositoryTest {
     @Test
     void sumsByCategoryType() {
         Account account = accountRepository.save(new Account("Cuenta Principal", "USD"));
-        Category income = categoryRepository.save(new Category("Salario", CategoryType.INCOME));
-        Category expense = categoryRepository.save(new Category("Renta", CategoryType.EXPENSE));
+        Category income = categoryRepository.save(new Category("Salario", CategoryType.INGRESO));
+        Category expense = categoryRepository.save(new Category("Renta", CategoryType.GASTO));
 
         transactionRepository.save(new Transaction(account, income, new BigDecimal("2000.00"), LocalDate.of(2024, 3, 1), "Pago"));
         transactionRepository.save(new Transaction(account, expense, new BigDecimal("700.00"), LocalDate.of(2024, 3, 2), "Renta"));
 
-        BigDecimal incomeTotal = transactionRepository.sumByAccountAndCategoryType(account.getId(), CategoryType.INCOME);
-        BigDecimal expenseTotal = transactionRepository.sumByAccountAndCategoryType(account.getId(), CategoryType.EXPENSE);
+        BigDecimal incomeTotal = transactionRepository.sumByAccountAndCategoryType(account.getId(), CategoryType.INGRESO);
+        BigDecimal expenseTotal = transactionRepository.sumByAccountAndCategoryType(account.getId(), CategoryType.GASTO);
 
         assertThat(incomeTotal).isEqualByComparingTo(new BigDecimal("2000.00"));
         assertThat(expenseTotal).isEqualByComparingTo(new BigDecimal("700.00"));
@@ -65,14 +65,14 @@ class TransactionRepositoryTest {
     @Test
     void groupsTotalsByCategory() {
         Account account = accountRepository.save(new Account("Cuenta Principal", "USD"));
-        Category food = categoryRepository.save(new Category("Comida", CategoryType.EXPENSE));
-        Category transport = categoryRepository.save(new Category("Transporte", CategoryType.EXPENSE));
+        Category food = categoryRepository.save(new Category("Comida", CategoryType.GASTO));
+        Category transport = categoryRepository.save(new Category("Transporte", CategoryType.GASTO));
 
         transactionRepository.save(new Transaction(account, food, new BigDecimal("50.00"), LocalDate.of(2024, 4, 1), "Almuerzo"));
         transactionRepository.save(new Transaction(account, food, new BigDecimal("30.00"), LocalDate.of(2024, 4, 2), "Cena"));
         transactionRepository.save(new Transaction(account, transport, new BigDecimal("20.00"), LocalDate.of(2024, 4, 3), "Bus"));
 
-        List<Object[]> totals = transactionRepository.totalsByCategory(account.getId(), CategoryType.EXPENSE);
+        List<Object[]> totals = transactionRepository.totalsByCategory(account.getId(), CategoryType.GASTO);
 
         assertThat(totals).hasSize(2);
     }
