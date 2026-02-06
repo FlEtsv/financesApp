@@ -184,6 +184,21 @@
       cursor: not-allowed;
     }
 
+    button.secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button.secondary:disabled {
+      background: #cbd5f5;
+      cursor: not-allowed;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -250,6 +265,20 @@
       font-size: 12px;
       color: var(--muted);
       margin-bottom: 6px;
+    }
+
+    .recommendation-panel {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5f5;
+    }
+
+    .recommendation-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
     }
 
     .divider {
@@ -546,6 +575,15 @@
             <div>Describe tu consulta y te ayudaremos con insights financieros.</div>
           </div>
         </div>
+        <div class="recommendation-panel">
+          <div class="recommendation-meta">Recomendaciones automáticas</div>
+          <div id="recommendationContent" class="muted">
+            Aún no hay recomendaciones generadas.
+          </div>
+          <div style="margin-top: 12px;">
+            <button id="refreshRecommendations" class="secondary">Actualizar recomendación</button>
+          </div>
+        </div>
         <div class="divider"></div>
         <div>
           <label for="chatInput">Consulta</label>
@@ -582,6 +620,8 @@
     const chatWindow = document.getElementById('chatWindow');
     const chatInput = document.getElementById('chatInput');
     const sendChatButton = document.getElementById('sendChat');
+    const recommendationContent = document.getElementById('recommendationContent');
+    const refreshRecommendationsButton = document.getElementById('refreshRecommendations');
     const totalsChart = document.getElementById('totalsChart');
     const trendChart = document.getElementById('trendChart');
     const newAccountName = document.getElementById('newAccountName');
@@ -599,6 +639,7 @@
             document.getElementById('accountNameInitialBalance');
 
     let chatSessionId = '';
+    let recommendationsTimerId = null;
 
     const today = new Date().toISOString().slice(0, 10);
     startDateInput.value = startDateInput.value || today;
@@ -651,6 +692,25 @@
       `;
       chatWindow.appendChild(container);
       chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    /**
+     * Renderiza la recomendación actual en la tarjeta de IA.
+     */
+    function renderRecommendation(recommendation) {
+      if (!recommendation) {
+        recommendationContent.textContent = 'Aún no hay recomendaciones generadas.';
+        return;
+      }
+
+      const generatedAt = recommendation.generatedAt
+        ? new Date(recommendation.generatedAt).toLocaleString('es-ES')
+        : 'sin fecha';
+
+      recommendationContent.innerHTML = `
+        <strong>Última actualización:</strong> ${generatedAt}<br />
+        ${recommendation.recommendation || 'Sin recomendación disponible.'}
+      `;
     }
 
     /**
@@ -970,6 +1030,37 @@
     }
 
     /**
+     * Consulta la última recomendación generada por el backend.
+     */
+    async function loadAiRecommendations() {
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        renderRecommendation(null);
+        return;
+      }
+
+      refreshRecommendationsButton.disabled = true;
+
+      try {
+        const response = await fetch(`/app/api/ai/recommendations?accountName=${encodeURIComponent(accountName)}`);
+        if (response.status === 204) {
+          renderRecommendation(null);
+          return;
+        }
+        if (!response.ok) {
+          throw new Error('No se pudo cargar la recomendación.');
+        }
+        const data = await response.json();
+        renderRecommendation(data);
+      } catch (error) {
+        recommendationContent.textContent = 'No se pudo obtener la recomendación.';
+        console.error(error);
+      } finally {
+        refreshRecommendationsButton.disabled = false;
+      }
+    }
+
+    /**
      * Dispara la consulta a la IA con el contexto necesario.
      */
     async function sendChat() {
@@ -1053,6 +1144,7 @@
         actualBalance.textContent = formatCurrency(budgetData.actualBalance || 0);
         actualIncome.textContent = formatCurrency(budgetData.actualIncome || 0);
         actualExpense.textContent = formatCurrency(budgetData.actualExpense || 0);
+        await loadAiRecommendations();
       } catch (error) {
         metricBalance.textContent = '€ --';
         metricIncome.textContent = '€ --';
@@ -1066,6 +1158,7 @@
         actualBalance.textContent = '€ --';
         actualIncome.textContent = '€ --';
         actualExpense.textContent = '€ --';
+        renderRecommendation(null);
         console.error(error);
       } finally {
         loadButton.disabled = false;
@@ -1090,6 +1183,7 @@
     createAccountButton.addEventListener('click', createAccount);
     createPlannedButton.addEventListener('click', createPlannedMovement);
     updateInitialBalanceButton.addEventListener('click', updateInitialBalance);
+    refreshRecommendationsButton.addEventListener('click', loadAiRecommendations);
     accountSelect.addEventListener('change', () => {
       const selectedOption = accountSelect.selectedOptions[0];
       if (selectedOption && selectedOption.dataset.currency) {
@@ -1103,9 +1197,15 @@
       loadPlannedMovements();
     });
 
+    if (recommendationsTimerId) {
+      clearInterval(recommendationsTimerId);
+    }
+    recommendationsTimerId = setInterval(loadAiRecommendations, 60000);
+
     loadAccounts().then(() => {
       loadDashboardData();
       loadPlannedMovements();
+      loadAiRecommendations();
     });
   </script>
 </body>

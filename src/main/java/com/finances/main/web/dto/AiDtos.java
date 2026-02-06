@@ -65,4 +65,15 @@ public final class AiDtos {
      */
     public record AiChatResponse(String sessionId, String reply, Instant respondedAt) {
     }
+
+    /**
+     * Respuesta con recomendaciones periódicas de la IA.
+     */
+    public record AiRecommendationResponse(
+        String accountName,
+        String recommendation,
+        Instant generatedAt,
+        AiContextResponse context
+    ) {
+    }
 }

@@ -10,6 +10,7 @@ import com.finances.main.service.LedgerService;
 import com.finances.main.service.PlannedMovementService;
 import com.finances.main.service.TransactionService;
 import com.finances.main.service.ai.AiContextService;
+import com.finances.main.service.ai.AiRecommendationService;
 import com.finances.main.service.ai.ExtChatClient;
 import com.finances.main.web.dto.AccountDtos.AccountBalanceUpdateRequest;
 import com.finances.main.web.dto.AccountDtos.AccountCreateRequest;
@@ -17,6 +18,7 @@ import com.finances.main.web.dto.AccountDtos.AccountSummary;
 import com.finances.main.web.dto.AiDtos.AiChatRequest;
 import com.finances.main.web.dto.AiDtos.AiChatResponse;
 import com.finances.main.web.dto.AiDtos.AiContextResponse;
+import com.finances.main.web.dto.AiDtos.AiRecommendationResponse;
 import com.finances.main.web.dto.BudgetDtos.BudgetSummaryResponse;
 import com.finances.main.web.dto.BudgetDtos.MonthlySummaryResponse;
 import com.finances.main.web.dto.FinancialGoalDtos.FinancialGoalCreateRequest;
@@ -43,6 +45,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,7 +70,7 @@ public class AppApiController {
     private final BudgetService budgetService;
     private final AiContextService aiContextService;
     private final ExtChatClient extChatClient;
-    private final AiContextService aiContextService;
+    private final AiRecommendationService aiRecommendationService;
 
     public AppApiController(
         LedgerService ledgerService,
@@ -77,7 +80,8 @@ public class AppApiController {
         FinancialGoalService financialGoalService,
         BudgetService budgetService,
         AiContextService aiContextService,
-        ExtChatClient extChatClient
+        ExtChatClient extChatClient,
+        AiRecommendationService aiRecommendationService
     ) {
         this.ledgerService = ledgerService;
         this.accountService = accountService;
@@ -87,7 +91,7 @@ public class AppApiController {
         this.budgetService = budgetService;
         this.aiContextService = aiContextService;
         this.extChatClient = extChatClient;
-        this.aiContextService = aiContextService;
+        this.aiRecommendationService = aiRecommendationService;
     }
 
     /**
@@ -437,6 +441,23 @@ public class AppApiController {
     public AiChatResponse chatWithAi(@RequestBody AiChatRequest request) {
         AiChatRequest enrichedRequest = aiContextService.enrichChatRequest(request);
         return extChatClient.sendChat(enrichedRequest);
+    }
+
+    /**
+     * Devuelve la última recomendación generada por la IA para la cuenta.
+     */
+    @GetMapping("/ai/recommendations")
+    public ResponseEntity<AiRecommendationResponse> getLatestRecommendation(
+        @RequestParam String accountName
+    ) {
+        return aiRecommendationService.getLatestRecommendation(accountName)
+            .map(snapshot -> ResponseEntity.ok(new AiRecommendationResponse(
+                snapshot.accountName(),
+                snapshot.recommendation(),
+                snapshot.generatedAt(),
+                snapshot.context()
+            )))
+            .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
 

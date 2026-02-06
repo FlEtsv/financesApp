@@ -17,6 +17,8 @@ import com.finances.main.service.FinancialGoalService;
 import com.finances.main.service.LedgerService;
 import com.finances.main.service.PlannedMovementService;
 import com.finances.main.service.TransactionService;
+import com.finances.main.service.ai.AiContextService;
+import com.finances.main.service.ai.AiRecommendationService;
 import com.finances.main.service.ai.ExtChatClient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -55,7 +57,13 @@ class AppApiControllerTest {
     private BudgetService budgetService;
 
     @MockBean
+    private AiContextService aiContextService;
+
+    @MockBean
     private ExtChatClient extChatClient;
+
+    @MockBean
+    private AiRecommendationService aiRecommendationService;
 
     @Test
     void returnsBalanceForApp() throws Exception {
