@@ -9,6 +9,7 @@ import com.finances.main.service.FinancialGoalService;
 import com.finances.main.service.LedgerService;
 import com.finances.main.service.PlannedMovementService;
 import com.finances.main.service.TransactionService;
+import com.finances.main.service.ai.AiContextService;
 import com.finances.main.service.ai.ExtChatClient;
 import com.finances.main.web.dto.AccountDtos.AccountBalanceUpdateRequest;
 import com.finances.main.web.dto.AccountDtos.AccountCreateRequest;
@@ -16,7 +17,6 @@ import com.finances.main.web.dto.AccountDtos.AccountSummary;
 import com.finances.main.web.dto.AiDtos.AiChatRequest;
 import com.finances.main.web.dto.AiDtos.AiChatResponse;
 import com.finances.main.web.dto.AiDtos.AiContextResponse;
-import com.finances.main.web.dto.AiDtos.PlannedMovementSummary;
 import com.finances.main.web.dto.BudgetDtos.BudgetSummaryResponse;
 import com.finances.main.web.dto.BudgetDtos.MonthlySummaryResponse;
 import com.finances.main.web.dto.FinancialGoalDtos.FinancialGoalCreateRequest;
@@ -65,6 +65,7 @@ public class AppApiController {
     private final TransactionService transactionService;
     private final FinancialGoalService financialGoalService;
     private final BudgetService budgetService;
+    private final AiContextService aiContextService;
     private final ExtChatClient extChatClient;
 
     public AppApiController(
@@ -74,6 +75,7 @@ public class AppApiController {
         TransactionService transactionService,
         FinancialGoalService financialGoalService,
         BudgetService budgetService,
+        AiContextService aiContextService,
         ExtChatClient extChatClient
     ) {
         this.ledgerService = ledgerService;
@@ -82,6 +84,7 @@ public class AppApiController {
         this.transactionService = transactionService;
         this.financialGoalService = financialGoalService;
         this.budgetService = budgetService;
+        this.aiContextService = aiContextService;
         this.extChatClient = extChatClient;
     }
 
@@ -422,33 +425,7 @@ public class AppApiController {
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
         @RequestParam CategoryType categoryType
     ) {
-        BigDecimal balance = ledgerService.calculateBalance(accountName);
-        Map<String, BigDecimal> totals = ledgerService.totalsByCategory(accountName, categoryType);
-        List<TransactionSummary> transactions = ledgerService.listTransactions(accountName, startDate, endDate)
-            .stream()
-            .map(this::toSummary)
-            .collect(Collectors.toList());
-        List<PlannedMovementSummary> plannedMovements = plannedMovementService.listByAccountName(accountName)
-            .stream()
-            .map(movement -> new PlannedMovementSummary(
-                movement.getName(),
-                movement.getType(),
-                movement.getAmount(),
-                movement.getStartDate(),
-                movement.isActive()
-            ))
-            .collect(Collectors.toList());
-
-        return new AiContextResponse(
-            accountName,
-            startDate,
-            endDate,
-            categoryType,
-            balance,
-            totals,
-            transactions,
-            plannedMovements
-        );
+        return aiContextService.buildContext(accountName, startDate, endDate, categoryType);
     }
 
     /**
@@ -456,7 +433,8 @@ public class AppApiController {
      */
     @PostMapping("/ai/chat")
     public AiChatResponse chatWithAi(@RequestBody AiChatRequest request) {
-        return extChatClient.sendChat(request);
+        AiChatRequest enrichedRequest = aiContextService.enrichChatRequest(request);
+        return extChatClient.sendChat(enrichedRequest);
     }
 
     private TransactionSummary toSummary(Transaction transaction) {
