@@ -17,7 +17,6 @@ import com.finances.main.web.dto.AccountDtos.AccountSummary;
 import com.finances.main.web.dto.AiDtos.AiChatRequest;
 import com.finances.main.web.dto.AiDtos.AiChatResponse;
 import com.finances.main.web.dto.AiDtos.AiContextResponse;
-import com.finances.main.web.dto.AiDtos.PlannedMovementSummary;
 import com.finances.main.web.dto.BudgetDtos.BudgetSummaryResponse;
 import com.finances.main.web.dto.BudgetDtos.MonthlySummaryResponse;
 import com.finances.main.web.dto.FinancialGoalDtos.FinancialGoalCreateRequest;
@@ -66,17 +65,19 @@ public class AppApiController {
     private final TransactionService transactionService;
     private final FinancialGoalService financialGoalService;
     private final BudgetService budgetService;
+    private final AiContextService aiContextService;
     private final ExtChatClient extChatClient;
     private final AiContextService aiContextService;
 
     public AppApiController(
-            LedgerService ledgerService,
-            AccountService accountService,
-            PlannedMovementService plannedMovementService,
-            TransactionService transactionService,
-            FinancialGoalService financialGoalService,
-            BudgetService budgetService,
-            ExtChatClient extChatClient, AiContextService aiContextService
+        LedgerService ledgerService,
+        AccountService accountService,
+        PlannedMovementService plannedMovementService,
+        TransactionService transactionService,
+        FinancialGoalService financialGoalService,
+        BudgetService budgetService,
+        AiContextService aiContextService,
+        ExtChatClient extChatClient
     ) {
         this.ledgerService = ledgerService;
         this.accountService = accountService;
@@ -84,6 +85,7 @@ public class AppApiController {
         this.transactionService = transactionService;
         this.financialGoalService = financialGoalService;
         this.budgetService = budgetService;
+        this.aiContextService = aiContextService;
         this.extChatClient = extChatClient;
         this.aiContextService = aiContextService;
     }

@@ -44,13 +44,13 @@ class AiContextServiceTest {
         Category category = new Category("Ventas", CategoryType.INGRESO);
         Transaction transaction = new Transaction(account, category, BigDecimal.TEN, endDate, "Ingreso");
         PlannedMovement plannedMovement = new PlannedMovement(
-                "Nómina",
-                BigDecimal.ONE,
-                PlannedMovementType.INGRESO_FIJO_NOMINA,
-                Periodicidad.MENSUAL,
-                startDate,
-                true,
-                account
+            "Nómina",
+            BigDecimal.ONE,
+            PlannedMovementType.INGRESO_FIJO_NOMINA,
+            Periodicidad.MENSUAL,
+            startDate,
+            true,
+            account
         );
 
         when(ledgerService.calculateBalance(accountName)).thenReturn(BigDecimal.TEN);
@@ -77,24 +77,24 @@ class AiContextServiceTest {
         Category category = new Category("Marketing", CategoryType.GASTO);
         Transaction transaction = new Transaction(account, category, BigDecimal.ONE, endDate, "Campaña");
         PlannedMovement plannedMovement = new PlannedMovement(
-                "Hosting",
-                BigDecimal.ONE,
-                PlannedMovementType.GASTO_FIJO,
-                Periodicidad.MENSUAL,
-                startDate,
-                true,
-                account
+            "Hosting",
+            BigDecimal.ONE,
+            PlannedMovementType.GASTO_FIJO,
+            Periodicidad.MENSUAL,
+            startDate,
+            true,
+            account
         );
 
         AiContextResponse incompleteContext = new AiContextResponse(
-                accountName,
-                startDate,
-                endDate,
-                categoryType,
-                null,
-                null,
-                List.of(),
-                List.of()
+            accountName,
+            startDate,
+            endDate,
+            categoryType,
+            null,
+            null,
+            List.of(),
+            List.of()
         );
 
         when(ledgerService.calculateBalance(accountName)).thenReturn(BigDecimal.ONE);

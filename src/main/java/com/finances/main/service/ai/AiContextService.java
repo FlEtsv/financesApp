@@ -35,35 +35,35 @@ public class AiContextService {
      * Construye el contexto completo desde el backend para una consulta de IA.
      */
     public AiContextResponse buildContext(
-            String accountName,
-            LocalDate startDate,
-            LocalDate endDate,
-            CategoryType categoryType
+        String accountName,
+        LocalDate startDate,
+        LocalDate endDate,
+        CategoryType categoryType
     ) {
         BigDecimal balance = ledgerService.calculateBalance(accountName);
         Map<String, BigDecimal> totals = categoryType == null
-                ? Collections.emptyMap()
-                : ledgerService.totalsByCategory(accountName, categoryType);
+            ? Collections.emptyMap()
+            : ledgerService.totalsByCategory(accountName, categoryType);
         List<TransactionSummary> transactions = startDate == null || endDate == null
-                ? List.of()
-                : ledgerService.listTransactions(accountName, startDate, endDate)
+            ? List.of()
+            : ledgerService.listTransactions(accountName, startDate, endDate)
                 .stream()
                 .map(this::toSummary)
                 .collect(Collectors.toList());
         List<PlannedMovementSummary> plannedMovements = plannedMovementService.listByAccountName(accountName)
-                .stream()
-                .map(this::toPlannedSummary)
-                .collect(Collectors.toList());
+            .stream()
+            .map(this::toPlannedSummary)
+            .collect(Collectors.toList());
 
         return new AiContextResponse(
-                accountName,
-                startDate,
-                endDate,
-                categoryType,
-                balance,
-                totals,
-                transactions,
-                plannedMovements
+            accountName,
+            startDate,
+            endDate,
+            categoryType,
+            balance,
+            totals,
+            transactions,
+            plannedMovements
         );
     }
 
@@ -97,28 +97,28 @@ public class AiContextService {
         }
 
         List<TransactionSummary> recentTransactions = resolveTransactions(
-                context.recentTransactions(),
-                accountName,
-                startDate,
-                endDate,
-                needsRefresh
+            context.recentTransactions(),
+            accountName,
+            startDate,
+            endDate,
+            needsRefresh
         );
 
         List<PlannedMovementSummary> plannedMovements = resolvePlannedMovements(
-                context.plannedMovements(),
-                accountName,
-                needsRefresh
+            context.plannedMovements(),
+            accountName,
+            needsRefresh
         );
 
         return new AiContextResponse(
-                accountName,
-                startDate,
-                endDate,
-                categoryType,
-                balance,
-                totals,
-                recentTransactions,
-                plannedMovements
+            accountName,
+            startDate,
+            endDate,
+            categoryType,
+            balance,
+            totals,
+            recentTransactions,
+            plannedMovements
         );
     }
 
@@ -137,56 +137,56 @@ public class AiContextService {
     }
 
     private List<TransactionSummary> resolveTransactions(
-            List<TransactionSummary> current,
-            String accountName,
-            LocalDate startDate,
-            LocalDate endDate,
-            boolean needsRefresh
+        List<TransactionSummary> current,
+        String accountName,
+        LocalDate startDate,
+        LocalDate endDate,
+        boolean needsRefresh
     ) {
         if (current == null || (needsRefresh && current.isEmpty())) {
             if (startDate == null || endDate == null) {
                 return List.of();
             }
             return ledgerService.listTransactions(accountName, startDate, endDate)
-                    .stream()
-                    .map(this::toSummary)
-                    .collect(Collectors.toList());
+                .stream()
+                .map(this::toSummary)
+                .collect(Collectors.toList());
         }
         return current;
     }
 
     private List<PlannedMovementSummary> resolvePlannedMovements(
-            List<PlannedMovementSummary> current,
-            String accountName,
-            boolean needsRefresh
+        List<PlannedMovementSummary> current,
+        String accountName,
+        boolean needsRefresh
     ) {
         if (current == null || (needsRefresh && current.isEmpty())) {
             return plannedMovementService.listByAccountName(accountName)
-                    .stream()
-                    .map(this::toPlannedSummary)
-                    .collect(Collectors.toList());
+                .stream()
+                .map(this::toPlannedSummary)
+                .collect(Collectors.toList());
         }
         return current;
     }
 
     private TransactionSummary toSummary(Transaction transaction) {
         return new TransactionSummary(
-                transaction.getId(),
-                transaction.getAmount(),
-                transaction.getTransactionDate(),
-                transaction.getDescription(),
-                transaction.getCategory().getName(),
-                transaction.getCategory().getType()
+            transaction.getId(),
+            transaction.getAmount(),
+            transaction.getTransactionDate(),
+            transaction.getDescription(),
+            transaction.getCategory().getName(),
+            transaction.getCategory().getType()
         );
     }
 
     private PlannedMovementSummary toPlannedSummary(PlannedMovement movement) {
         return new PlannedMovementSummary(
-                movement.getName(),
-                movement.getType(),
-                movement.getAmount(),
-                movement.getStartDate(),
-                movement.isActive()
+            movement.getName(),
+            movement.getType(),
+            movement.getAmount(),
+            movement.getStartDate(),
+            movement.isActive()
         );
     }
 }
