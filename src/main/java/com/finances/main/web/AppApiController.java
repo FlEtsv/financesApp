@@ -67,6 +67,7 @@ public class AppApiController {
     private final BudgetService budgetService;
     private final AiContextService aiContextService;
     private final ExtChatClient extChatClient;
+    private final AiContextService aiContextService;
 
     public AppApiController(
         LedgerService ledgerService,
@@ -86,6 +87,7 @@ public class AppApiController {
         this.budgetService = budgetService;
         this.aiContextService = aiContextService;
         this.extChatClient = extChatClient;
+        this.aiContextService = aiContextService;
     }
 
     /**
@@ -437,27 +439,28 @@ public class AppApiController {
         return extChatClient.sendChat(enrichedRequest);
     }
 
+
     private TransactionSummary toSummary(Transaction transaction) {
         return new TransactionSummary(
-            transaction.getId(),
-            transaction.getAmount(),
-            transaction.getTransactionDate(),
-            transaction.getDescription(),
-            transaction.getCategory().getName(),
-            transaction.getCategory().getType()
+                transaction.getId(),
+                transaction.getAmount(),
+                transaction.getTransactionDate(),
+                transaction.getDescription(),
+                transaction.getCategory().getName(),
+                transaction.getCategory().getType()
         );
     }
 
     private PlannedMovementResponse toMovementResponse(PlannedMovement movement) {
         return new PlannedMovementResponse(
-            movement.getId(),
-            movement.getAccount().getName(),
-            movement.getName(),
-            movement.getAmount(),
-            movement.getType(),
-            movement.getPeriodicidad(),
-            movement.getStartDate(),
-            movement.isActive()
+                movement.getId(),
+                movement.getAccount().getName(),
+                movement.getName(),
+                movement.getAmount(),
+                movement.getType(),
+                movement.getPeriodicidad(),
+                movement.getStartDate(),
+                movement.isActive()
         );
     }
 }
