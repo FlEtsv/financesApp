@@ -1,5 +1,6 @@
 package com.finances.main.service.ai;
 
+import com.finances.main.model.CategoryType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class AiProperties {
     private String systemPrompt;
     private final Ext ext = new Ext();
+    private final Recommendations recommendations = new Recommendations();
 
     public String getSystemPrompt() {
         return systemPrompt;
@@ -22,6 +24,10 @@ public class AiProperties {
 
     public Ext getExt() {
         return ext;
+    }
+
+    public Recommendations getRecommendations() {
+        return recommendations;
     }
 
     public static class Ext {
@@ -51,6 +57,57 @@ public class AiProperties {
 
         public void setTimeoutSeconds(int timeoutSeconds) {
             this.timeoutSeconds = timeoutSeconds;
+        }
+    }
+
+    /**
+     * Configuración específica para recomendaciones automáticas.
+     */
+    public static class Recommendations {
+        private boolean enabled = true;
+        private long intervalMs = 1_800_000;
+        private int lookbackDays = 30;
+        private CategoryType categoryType = CategoryType.GASTO;
+        private String prompt;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public long getIntervalMs() {
+            return intervalMs;
+        }
+
+        public void setIntervalMs(long intervalMs) {
+            this.intervalMs = intervalMs;
+        }
+
+        public int getLookbackDays() {
+            return lookbackDays;
+        }
+
+        public void setLookbackDays(int lookbackDays) {
+            this.lookbackDays = lookbackDays;
+        }
+
+        public CategoryType getCategoryType() {
+            return categoryType;
+        }
+
+        public void setCategoryType(CategoryType categoryType) {
+            this.categoryType = categoryType;
+        }
+
+        public String getPrompt() {
+            return prompt;
+        }
+
+        public void setPrompt(String prompt) {
+            this.prompt = prompt;
         }
     }
 }

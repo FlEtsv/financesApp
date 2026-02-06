@@ -23,7 +23,9 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
-    "ai.ext.base-url=http://localhost:0/api/ext/chat"
+    "ai.ext.base-url=http://localhost:0/api/ext/chat",
+    "ai.recommendations.enabled=true",
+    "ai.recommendations.interval-ms=9999999"
 })
 class AppApiControllerIntegrationTest {
     @Autowired
@@ -158,5 +160,40 @@ class AppApiControllerIntegrationTest {
         JsonNode response = objectMapper.readTree(chatResult.getResponse().getContentAsString());
         assertThat(response.get("reply").asText()).contains("balance");
         assertThat(response.get("reply").asText()).contains("totales por categoría");
+    }
+
+    @Test
+    void returnsRecommendationAfterRecordingTransaction() throws Exception {
+        String accountPayload = """
+            {"name":"Cuenta recomendaciones","currency":"EUR"}
+            """;
+
+        mockMvc.perform(post("/app/api/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(accountPayload))
+            .andExpect(status().isCreated());
+
+        LocalDate today = LocalDate.now();
+        String transactionPayload = String.format(
+            """
+                {"accountName":"Cuenta recomendaciones","categoryName":"Servicios","categoryType":"GASTO",
+                 "amount":55.00,"transactionDate":"%s","description":"Hosting"}
+                """,
+            today
+        );
+
+        mockMvc.perform(post("/app/api/transactions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(transactionPayload))
+            .andExpect(status().isCreated());
+
+        MvcResult recommendationResult = mockMvc.perform(get("/app/api/ai/recommendations")
+                .param("accountName", "Cuenta recomendaciones"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        JsonNode recommendationNode = objectMapper.readTree(recommendationResult.getResponse().getContentAsString());
+        assertThat(recommendationNode.get("recommendation").asText()).isNotBlank();
+        assertThat(recommendationNode.get("accountName").asText()).isEqualTo("Cuenta recomendaciones");
     }
 }

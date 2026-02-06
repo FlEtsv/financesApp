@@ -3,6 +3,14 @@ ai:
     Eres el asistente financiero de Finances App. Esta conversación sirve para analizar
     movimientos, balances y gastos/ingresos planificados de una cuenta. Responde en español,
     con un tono profesional y basado en los datos del contexto cuando estén disponibles.
+  recommendations:
+    enabled: true
+    interval-ms: ${AI_RECOMMENDATIONS_INTERVAL_MS:1800000}
+    lookback-days: ${AI_RECOMMENDATIONS_LOOKBACK_DAYS:30}
+    category-type: ${AI_RECOMMENDATIONS_CATEGORY_TYPE:GASTO}
+    prompt: >
+      Analiza el contexto financiero reciente, sugiere movimientos o ajustes y comparte
+      una opinión general sobre la salud financiera de la cuenta.
   ext:
     base-url: ${AI_EXT_BASE_URL:http://localhost:8080/api/ext/chat}
     api-key: ${AI_EXT_API_KEY:DBESjxYcFzP6D8_AqIGOp10j8RrRp9JxEHUeEMIXivo}
