@@ -8,6 +8,8 @@ import com.finances.main.service.BudgetService;
 import com.finances.main.service.FinancialGoalService;
 import com.finances.main.service.LedgerService;
 import com.finances.main.service.PlannedMovementService;
+import com.finances.main.service.RagClientService;
+import com.finances.main.service.RagUnavailableException;
 import com.finances.main.service.TransactionService;
 import com.finances.main.service.ai.AiContextService;
 import com.finances.main.service.ai.AiRecommendationService;
@@ -77,6 +79,7 @@ public class AppApiController {
     private final AiContextService aiContextService;
     private final ExtChatClient extChatClient;
     private final AiRecommendationService aiRecommendationService;
+    private final RagClientService ragClientService;
 
     public AppApiController(
         LedgerService ledgerService,
@@ -87,7 +90,8 @@ public class AppApiController {
         BudgetService budgetService,
         AiContextService aiContextService,
         ExtChatClient extChatClient,
-        AiRecommendationService aiRecommendationService
+        AiRecommendationService aiRecommendationService,
+        RagClientService ragClientService
     ) {
         this.ledgerService = ledgerService;
         this.accountService = accountService;
@@ -98,6 +102,7 @@ public class AppApiController {
         this.aiContextService = aiContextService;
         this.extChatClient = extChatClient;
         this.aiRecommendationService = aiRecommendationService;
+        this.ragClientService = ragClientService;
     }
 
     /**
@@ -480,8 +485,16 @@ public class AppApiController {
         if (request == null || request.content() == null || request.content().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-        var response = ragClient.sendDocument(request);
-        return ResponseEntity.ok(response);
+        try {
+            var response = ragClientService.sendDocument(request);
+            return ResponseEntity.ok(response);
+        } catch (RagUnavailableException ex) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "El proveedor RAG no respondió. Revisa la configuración.",
+                ex
+            );
+        }
     }
 
 
