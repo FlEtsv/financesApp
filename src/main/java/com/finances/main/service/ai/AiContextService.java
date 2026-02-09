@@ -133,7 +133,7 @@ public class AiContextService {
         if (Objects.equals(context, request.context())) {
             return request;
         }
-        return new AiChatRequest(request.sessionId(), request.message(), context);
+        return new AiChatRequest(request.sessionId(), request.message(), request.model(), context);
     }
 
     private List<TransactionSummary> resolveTransactions(

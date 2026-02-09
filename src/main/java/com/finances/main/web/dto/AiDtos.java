@@ -1,5 +1,7 @@
 package com.finances.main.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.finances.main.model.CategoryType;
 import com.finances.main.model.PlannedMovementType;
 import java.math.BigDecimal;
@@ -57,7 +59,12 @@ public final class AiDtos {
     /**
      * Request de chat IA.
      */
-    public record AiChatRequest(String sessionId, String message, AiContextResponse context) {
+    public record AiChatRequest(
+        String sessionId,
+        @JsonProperty("mensaje") @JsonAlias("message") String message,
+        String model,
+        AiContextResponse context
+    ) {
     }
 
     /**

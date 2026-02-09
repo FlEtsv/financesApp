@@ -98,6 +98,30 @@ class FinanceFlowIntegrationTest {
     }
 
     @Test
+    void ignoresPlannedMovementsOutsideSummaryRange() {
+        accountService.createAccount("Cuenta Futuro", "EUR", new BigDecimal("500.00"));
+
+        plannedMovementService.createPlannedMovement(
+            "Cuenta Futuro",
+            "Ingreso futuro",
+            new BigDecimal("1200.00"),
+            PlannedMovementType.INGRESO_FIJO_NOMINA,
+            Periodicidad.MENSUAL,
+            LocalDate.now().plusMonths(1),
+            true
+        );
+
+        var summary = budgetService.buildSummary(
+            "Cuenta Futuro",
+            LocalDate.now(),
+            LocalDate.now().plusDays(1)
+        );
+
+        assertThat(summary.fixedIncome()).isEqualByComparingTo("0.00");
+        assertThat(summary.expectedBalance()).isEqualByComparingTo("500.00");
+    }
+
+    @Test
     void registersProgressOnFinancialGoal() {
         accountService.createAccount("Cuenta Objetivos", "EUR", new BigDecimal("0.00"));
 

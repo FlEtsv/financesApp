@@ -55,6 +55,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Endpoints /app/api para consumo de la interfaz web básica.
@@ -440,7 +441,15 @@ public class AppApiController {
     @PostMapping("/ai/chat")
     public AiChatResponse chatWithAi(@RequestBody AiChatRequest request) {
         AiChatRequest enrichedRequest = aiContextService.enrichChatRequest(request);
-        return extChatClient.sendChat(enrichedRequest);
+        try {
+            return extChatClient.sendChat(enrichedRequest);
+        } catch (com.finances.main.service.ai.ExternalAiUnavailableException ex) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "El proveedor de IA no respondió. Revisa la configuración.",
+                ex
+            );
+        }
     }
 
     /**

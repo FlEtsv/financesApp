@@ -244,7 +244,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      max-height: 360px;
+      max-height: 260px;
       overflow-y: auto;
       padding-right: 6px;
     }
@@ -354,6 +354,42 @@
         <span>Gastos críticos</span>
         <strong id="metricExpenses">€ --</strong>
         <div class="tag">Controlado</div>
+      </div>
+    </section>
+
+    <!-- IA y recomendaciones rápidas -->
+    <section class="grid grid-2">
+      <div class="card">
+        <h2>Asistente financiero (IA)</h2>
+        <p class="muted">Respuestas rápidas con contexto financiero actualizado.</p>
+        <div class="chat-window" id="chatWindow">
+          <div class="chat-message ai">
+            <div class="chat-meta">IA · Lista para ayudarte</div>
+            <div>Describe tu consulta y te ayudaremos con insights financieros.</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <label for="chatInput">Consulta</label>
+          <textarea id="chatInput" rows="3" placeholder="Ej: ¿Cómo impactan los gastos de marketing este mes?"></textarea>
+        </div>
+        <div style="margin-top: 12px;">
+          <button id="sendChat" class="primary">Enviar a IA</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Recomendaciones IA</h2>
+        <p class="muted">Resumen de acciones sugeridas y alertas financieras.</p>
+        <div class="recommendation-panel">
+          <div class="recommendation-meta">Recomendaciones automáticas</div>
+          <div id="recommendationContent" class="muted">
+            Aún no hay recomendaciones generadas.
+          </div>
+          <div style="margin-top: 12px;">
+            <button id="refreshRecommendations" class="secondary">Actualizar recomendación</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -543,56 +579,26 @@
       </div>
     </section>
 
-    <!-- Tabla de acciones y chat IA -->
-    <section class="grid grid-2">
-      <div class="card">
-        <h2>Acciones prioritarias</h2>
-        <p class="muted">Listado de transacciones clave para análisis y seguimiento.</p>
-        <table aria-label="Tabla de acciones prioritarias">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Descripción</th>
-              <th>Categoría</th>
-              <th>Importe</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="transactionsTable">
-            <tr>
-              <td colspan="5" class="muted">Sin datos cargados.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h2>Asistente financiero (IA)</h2>
-        <p class="muted">Contexto unificado desde la base de datos para respuestas más precisas.</p>
-        <div class="chat-window" id="chatWindow">
-          <div class="chat-message ai">
-            <div class="chat-meta">IA · Contexto listo</div>
-            <div>Describe tu consulta y te ayudaremos con insights financieros.</div>
-          </div>
-        </div>
-        <div class="recommendation-panel">
-          <div class="recommendation-meta">Recomendaciones automáticas</div>
-          <div id="recommendationContent" class="muted">
-            Aún no hay recomendaciones generadas.
-          </div>
-          <div style="margin-top: 12px;">
-            <button id="refreshRecommendations" class="secondary">Actualizar recomendación</button>
-          </div>
-        </div>
-        <div class="divider"></div>
-        <div>
-          <label for="chatInput">Consulta</label>
-          <textarea id="chatInput" rows="3" placeholder="Ej: ¿Cómo impactan los gastos de marketing este mes?"></textarea>
-        </div>
-        <div style="margin-top: 12px;">
-          <button id="sendChat" class="primary">Enviar a IA</button>
-        </div>
-      </div>
+    <!-- Tabla de acciones prioritarias -->
+    <section class="card">
+      <h2>Acciones prioritarias</h2>
+      <p class="muted">Listado de transacciones clave para análisis y seguimiento.</p>
+      <table aria-label="Tabla de acciones prioritarias">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Categoría</th>
+            <th>Importe</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="transactionsTable">
+          <tr>
+            <td colspan="5" class="muted">Sin datos cargados.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
   </main>
 
@@ -638,7 +644,9 @@
     const accountInitialBalanceSelect =
             document.getElementById('accountNameInitialBalance');
 
-    let chatSessionId = '';
+    // Mantiene la sesión de chat para conservar contexto entre recargas.
+    const CHAT_SESSION_STORAGE_KEY = 'finances.chat.sessionId';
+    let chatSessionId = localStorage.getItem(CHAT_SESSION_STORAGE_KEY) || '';
     let recommendationsTimerId = null;
 
     const today = new Date().toISOString().slice(0, 10);
@@ -1080,18 +1088,29 @@
         const response = await fetch('/app/api/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: chatSessionId, message, context })
+          body: JSON.stringify({
+            sessionId: chatSessionId,
+            mensaje: message,
+            model: 'fast',
+            context
+          })
         });
 
         if (!response.ok) {
-          throw new Error('No se pudo contactar al asistente IA.');
+          throw new Error('El proveedor de IA no respondió. Intenta nuevamente.');
         }
 
         const data = await response.json();
-        chatSessionId = data.sessionId || chatSessionId;
+        if (data.sessionId) {
+          chatSessionId = data.sessionId;
+          localStorage.setItem(CHAT_SESSION_STORAGE_KEY, data.sessionId);
+        }
         appendChatMessage({ sender: 'ai', message: data.reply || 'Respuesta pendiente.' });
       } catch (error) {
-        appendChatMessage({ sender: 'ai', message: 'En espera de integración con el endpoint de IA.' });
+        appendChatMessage({
+          sender: 'ai',
+          message: 'No se pudo obtener respuesta de IA en este momento.'
+        });
         console.error(error);
       } finally {
         sendChatButton.disabled = false;

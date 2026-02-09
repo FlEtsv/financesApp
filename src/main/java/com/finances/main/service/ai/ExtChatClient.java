@@ -13,11 +13,16 @@ import org.springframework.web.client.RestClientException;
  */
 @Component
 public class ExtChatClient {
+    private static final String DEFAULT_MODEL = "fast";
     private final RestClient restClient;
     private final AiProperties aiProperties;
     private final AiChatService fallbackService;
 
-    public ExtChatClient(AiProperties aiProperties, AiChatService fallbackService, RestClient.Builder restClientBuilder ) {
+    public ExtChatClient(
+        AiProperties aiProperties,
+        AiChatService fallbackService,
+        RestClient.Builder restClientBuilder
+    ) {
         this.aiProperties = aiProperties;
         this.fallbackService = fallbackService;
         this.restClient = restClientBuilder.build();
@@ -27,21 +32,22 @@ public class ExtChatClient {
      * Envía la solicitud de chat al endpoint configurado.
      */
     public AiChatResponse sendChat(AiChatRequest request) {
+        AiChatRequest normalizedRequest = normalizeRequest(request);
         try {
             AiChatResponse response = restClient
                 .post()
                 .uri(aiProperties.getExt().getBaseUrl())
-                .header("X-API-KEY", aiProperties.getExt().getApiKey())
+                .header("ex-api-key", aiProperties.getExt().getApiKey())
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(request)
+                .body(normalizedRequest)
                 .retrieve()
                 .body(AiChatResponse.class);
             if (!isValidResponse(response)) {
-                return fallbackService.generateReply(request);
+                return resolveFallbackOrThrow(normalizedRequest, null);
             }
             return response;
         } catch (RestClientException ex) {
-            return fallbackService.generateReply(request);
+            return resolveFallbackOrThrow(normalizedRequest, ex);
         }
     }
 
@@ -50,5 +56,29 @@ public class ExtChatClient {
      */
     private boolean isValidResponse(AiChatResponse response) {
         return response != null && response.reply() != null && !response.reply().isBlank();
+    }
+
+    /**
+     * Asegura el modelo por defecto requerido por el servicio externo.
+     */
+    private AiChatRequest normalizeRequest(AiChatRequest request) {
+        if (request == null) {
+            return new AiChatRequest(null, null, DEFAULT_MODEL, null);
+        }
+        String model = request.model();
+        if (model == null || model.isBlank()) {
+            model = DEFAULT_MODEL;
+        }
+        return new AiChatRequest(request.sessionId(), request.message(), model, request.context());
+    }
+
+    /**
+     * Usa el fallback solo cuando está habilitado; de lo contrario, propaga el fallo.
+     */
+    private AiChatResponse resolveFallbackOrThrow(AiChatRequest request, Exception cause) {
+        if (aiProperties.getExt().isFallbackEnabled()) {
+            return fallbackService.generateReply(request);
+        }
+        throw new ExternalAiUnavailableException("No se pudo obtener respuesta del proveedor de IA.", cause);
     }
 }

@@ -2,6 +2,8 @@ package com.finances.main.service.ai;
 
 import com.finances.main.web.dto.AiDtos.AiChatRequest;
 import java.util.StringJoiner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AiPromptBuilder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AiPromptBuilder.class);
     private final AiProperties aiProperties;
     private final AiChatRequestNormalizer requestNormalizer;
 
@@ -33,8 +36,21 @@ public class AiPromptBuilder {
             addLineIfPresent(joiner, formatContextLine("Movimientos recientes", request.context().recentTransactions()));
             addLineIfPresent(joiner, formatContextLine("Movimientos planificados", request.context().plannedMovements()));
         }
-        System.out.println(joiner);
-        return joiner.toString();
+        String prompt = joiner.toString();
+        logPrompt(prompt);
+        return prompt;
+    }
+
+    /**
+     * Registra el prompt solo para depuración, sin exponerlo al usuario final.
+     */
+    private void logPrompt(String prompt) {
+        if (prompt == null || prompt.isBlank()) {
+            return;
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Prompt construido para IA: {}", prompt);
+        }
     }
 
     /**
