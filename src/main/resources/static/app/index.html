@@ -1,3 +1,4 @@
+﻿
 <!doctype html>
 <html lang="es">
 <head>
@@ -5,22 +6,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Finances App · Dashboard</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
+
     :root {
       color-scheme: light;
-      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-      --primary: #1e3a8a;
-      --primary-strong: #0f2d72;
-      --primary-soft: #e7edff;
-      --bg: #f6f8fc;
-      --card: #ffffff;
-      --text: #0b1220;
-      --muted: #5b6b83;
-      --border: #e5ebf4;
-      --success: #0f9d58;
+      --font-body: "Manrope", sans-serif;
+      --font-display: "Sora", sans-serif;
+      --primary: #123a52;
+      --primary-strong: #0c2a3a;
+      --accent: #ff6b4a;
+      --accent-soft: #ffe3d8;
+      --teal: #12b5a6;
+      --bg: #f5f1ea;
+      --surface: #ffffff;
+      --surface-2: #f3f6f9;
+      --text: #0f172a;
+      --muted: #5d6a7a;
+      --border: #e1e7ef;
+      --success: #16a34a;
       --warning: #f59e0b;
-      --shadow: 0 10px 28px rgba(12, 32, 74, 0.08);
-      --radius-lg: 18px;
-      --radius-md: 12px;
+      --danger: #e11d48;
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      --radius-lg: 22px;
+      --radius-md: 14px;
     }
 
     * {
@@ -29,9 +37,37 @@
 
     body {
       margin: 0;
-      background: var(--bg);
+      font-family: var(--font-body);
       color: var(--text);
-      letter-spacing: 0.1px;
+      background:
+        radial-gradient(circle at top left, rgba(255, 107, 74, 0.15), transparent 45%),
+        radial-gradient(circle at 20% 80%, rgba(18, 181, 166, 0.12), transparent 40%),
+        linear-gradient(140deg, #f7f3ed 0%, #eef3f8 60%, #f9f6f1 100%);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: -120px;
+      right: -80px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(18, 58, 82, 0.18), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -180px;
+      left: -120px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(255, 107, 74, 0.18), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
     }
 
     .app-shell {
@@ -42,9 +78,9 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+      background: rgba(255, 255, 255, 0.86);
+      border-bottom: 1px solid rgba(225, 231, 239, 0.8);
+      backdrop-filter: blur(12px);
     }
 
     .topbar {
@@ -64,23 +100,25 @@
     }
 
     .brand-badge {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(140deg, #123a52, #1f5a7a);
       display: grid;
       place-items: center;
       color: #fff;
       font-weight: 700;
       font-size: 16px;
-      letter-spacing: 0.5px;
-      box-shadow: 0 10px 18px rgba(30, 58, 138, 0.3);
+      letter-spacing: 0.6px;
+      box-shadow: 0 12px 24px rgba(18, 58, 82, 0.35);
+      font-family: var(--font-display);
     }
 
     header h1 {
       margin: 0;
       font-size: 18px;
       font-weight: 700;
+      font-family: var(--font-display);
     }
 
     header .subtitle {
@@ -113,15 +151,15 @@
     }
 
     .nav-link:hover {
-      background: #f1f5ff;
-      border-color: #dfe7ff;
+      background: #edf3f8;
+      border-color: #d7e0eb;
       color: var(--primary);
     }
 
     .nav-link.active {
-      background: var(--primary-soft);
-      color: var(--primary);
-      border-color: #d6e0ff;
+      background: var(--accent-soft);
+      color: var(--primary-strong);
+      border-color: #ffd5c7;
     }
 
     .topbar-actions {
@@ -136,7 +174,7 @@
       gap: 8px;
       padding: 6px 12px;
       border-radius: 999px;
-      background: #f1f5f9;
+      background: #f2f5f8;
       font-size: 12px;
       color: var(--muted);
       font-weight: 600;
@@ -163,8 +201,13 @@
       gap: 24px;
     }
 
-    .grid-3 {
+    .grid-4 {
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      align-items: stretch;
     }
 
     .grid-2 {
@@ -173,7 +216,7 @@
     }
 
     .card {
-      background: var(--card);
+      background: var(--surface);
       border-radius: var(--radius-lg);
       padding: 20px 22px;
       box-shadow: var(--shadow);
@@ -184,6 +227,7 @@
       margin: 0 0 10px;
       font-size: 16px;
       font-weight: 700;
+      font-family: var(--font-display);
     }
 
     .metric {
@@ -203,18 +247,29 @@
     .metric strong {
       font-size: 26px;
       font-weight: 700;
+      font-family: var(--font-display);
     }
 
     .tag {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: var(--primary-soft);
+      background: #eef2ff;
       color: var(--primary);
       padding: 4px 10px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 600;
+    }
+
+    .tag.ok {
+      background: #e8f7ef;
+      color: var(--success);
+    }
+
+    .tag.warn {
+      background: #fff4db;
+      color: var(--warning);
     }
 
     .toolbar {
@@ -250,26 +305,26 @@
     input:focus,
     select:focus,
     textarea:focus {
-      border-color: #c7d7ff;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+      border-color: #bcd5e8;
+      box-shadow: 0 0 0 3px rgba(18, 58, 82, 0.12);
       outline: none;
     }
 
     button.primary {
-      background: var(--primary);
+      background: linear-gradient(120deg, var(--primary), #1f5a7a);
       color: #fff;
       border: none;
       border-radius: var(--radius-md);
       padding: 10px 16px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(30, 58, 138, 0.22);
+      box-shadow: 0 12px 24px rgba(18, 58, 82, 0.3);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     button.primary:hover {
       transform: translateY(-1px);
-      box-shadow: 0 14px 26px rgba(30, 58, 138, 0.26);
+      box-shadow: 0 16px 30px rgba(18, 58, 82, 0.35);
     }
 
     button.primary:disabled {
@@ -279,13 +334,18 @@
     }
 
     button.secondary {
-      background: #eef2f8;
+      background: #f0f4f8;
       color: #0f172a;
       border: 1px solid #e2e8f0;
       border-radius: var(--radius-md);
       padding: 10px 16px;
       font-weight: 700;
       cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button.secondary:hover {
+      background: #e8eef5;
     }
 
     button.secondary:disabled {
@@ -314,6 +374,20 @@
       letter-spacing: 0.08em;
     }
 
+    tbody tr:nth-child(even) {
+      background: #f9fbfd;
+    }
+
+    .amount.positive {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .amount.negative {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
     .status {
       display: inline-flex;
       align-items: center;
@@ -334,6 +408,11 @@
       color: var(--warning);
     }
 
+    .status.info {
+      background: #eef2f6;
+      color: var(--muted);
+    }
+
     .chat-window {
       display: flex;
       flex-direction: column;
@@ -351,8 +430,13 @@
     }
 
     .chat-message.ai {
-      background: #eef2ff;
-      border-color: #c7d2fe;
+      background: #eef7ff;
+      border-color: #cde1f5;
+    }
+
+    .chat-message.user {
+      background: #fff5f2;
+      border-color: #ffd5c7;
     }
 
     .chat-meta {
@@ -367,7 +451,7 @@
       padding: 12px 14px;
       border-radius: 14px;
       background: #f8fafc;
-      border: 1px dashed #cbd5f5;
+      border: 1px dashed #cbd5e1;
     }
 
     .recommendation-meta {
@@ -388,7 +472,7 @@
     }
 
     .chart-container {
-      height: 240px;
+      height: 220px;
     }
 
     canvas {
@@ -415,11 +499,110 @@
       gap: 16px;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
+
+    .insights-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .insight {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .insight span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .insight strong {
+      font-size: 18px;
+      font-weight: 700;
+      font-family: var(--font-display);
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .alerts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .alert-item {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      font-size: 13px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .alert-item.warn {
+      border-color: #fde68a;
+      background: #fffbeb;
+      color: #92400e;
+    }
+
+    .alert-item.info {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+      color: #1e3a8a;
+    }
+
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .reveal {
+      animation: fadeUp 0.6s ease forwards;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal],
+      .reveal {
+        opacity: 1;
+        transform: none;
+        animation: none;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="app-shell">
-    <!-- Cabecera principal de la aplicación empresarial -->
     <header>
       <div class="topbar">
         <div class="brand">
@@ -444,273 +627,307 @@
     </header>
 
     <main>
-    <!-- Resumen ejecutivo -->
-    <section class="grid grid-3">
-      <div class="card metric">
-        <span>Balance consolidado</span>
-        <strong id="metricBalance">€ --</strong>
-        <div class="tag" id="metricBalanceTrend">Actualizado</div>
-      </div>
-      <div class="card metric">
-        <span>Ingresos del mes</span>
-        <strong id="metricIncome">€ --</strong>
-        <div class="tag">Objetivo 98%</div>
-      </div>
-      <div class="card metric">
-        <span>Gastos críticos</span>
-        <strong id="metricExpenses">€ --</strong>
-        <div class="tag">Controlado</div>
-      </div>
-    </section>
+      <section class="grid grid-4" data-reveal>
+        <div class="card metric">
+          <span>Balance consolidado</span>
+          <strong id="metricBalance">€ --</strong>
+          <div class="tag" id="metricBalanceTrend">Estable</div>
+        </div>
+        <div class="card metric">
+          <span>Ingresos del periodo</span>
+          <strong id="metricIncome">€ --</strong>
+          <div class="tag">Actualizado</div>
+        </div>
+        <div class="card metric">
+          <span>Gastos del periodo</span>
+          <strong id="metricExpenses">€ --</strong>
+          <div class="tag">Seguimiento</div>
+        </div>
+        <div class="card metric">
+          <span>Flujo neto</span>
+          <strong id="metricNetCashflow">€ --</strong>
+          <div class="tag" id="metricNetTrend">Periodo</div>
+        </div>
+      </section>
 
-    <!-- IA y recomendaciones rápidas -->
-    <section class="grid grid-2">
-      <div class="card">
-        <h2>Asistente financiero (IA)</h2>
-        <p class="muted">Respuestas rápidas con contexto financiero actualizado.</p>
-        <div class="chat-window" id="chatWindow">
-          <div class="chat-message ai">
-            <div class="chat-meta">IA · Lista para ayudarte</div>
-            <div>Describe tu consulta y te ayudaremos con insights financieros.</div>
+      <section class="grid grid-2" data-reveal>
+        <div class="card">
+          <h2>Asistente financiero (IA)</h2>
+          <p class="muted">Respuestas rápidas con contexto financiero actualizado.</p>
+          <div class="chat-window" id="chatWindow">
+            <div class="chat-message ai">
+              <div class="chat-meta">IA · Lista para ayudarte</div>
+              <div>Describe tu consulta y te ayudaremos con insights financieros.</div>
+            </div>
           </div>
-        </div>
-        <div class="divider"></div>
-        <div>
-          <label for="chatInput">Consulta</label>
-          <textarea id="chatInput" rows="3" placeholder="Ej: ¿Cómo impactan los gastos de marketing este mes?"></textarea>
-        </div>
-        <div style="margin-top: 12px;">
-          <button id="sendChat" class="primary">Enviar a IA</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Recomendaciones IA</h2>
-        <p class="muted">Resumen de acciones sugeridas y alertas financieras.</p>
-        <div class="recommendation-panel">
-          <div class="recommendation-meta">Recomendaciones automáticas</div>
-          <div id="recommendationContent" class="muted">
-            Aún no hay recomendaciones generadas.
+          <div class="divider"></div>
+          <div>
+            <label for="chatInput">Consulta</label>
+            <textarea id="chatInput" rows="3" placeholder="Ej: ¿Cómo impactan los gastos de marketing este mes?"></textarea>
           </div>
           <div style="margin-top: 12px;">
-            <button id="refreshRecommendations" class="secondary">Actualizar recomendación</button>
+            <button id="sendChat" class="primary">Enviar a IA</button>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Filtros y estado operativo -->
-    <section class="card">
-      <h2>Panel operativo</h2>
-      <div class="toolbar">
-        <div>
-          <label for="accountName">Cuenta</label>
-          <select id="accountName"></select>
+        <div class="card">
+          <h2>Recomendaciones IA</h2>
+          <p class="muted">Resumen de acciones sugeridas y alertas financieras.</p>
+          <div class="recommendation-panel">
+            <div class="recommendation-meta">Recomendaciones automáticas</div>
+            <div id="recommendationContent" class="muted">
+              Aún no hay recomendaciones generadas.
+            </div>
+            <div style="margin-top: 12px;">
+              <button id="refreshRecommendations" class="secondary">Actualizar recomendación</button>
+            </div>
+          </div>
         </div>
-        <div>
-          <label for="categoryType">Tipo de categoría</label>
-          <select id="categoryType">
-            <option value="INGRESO">Ingreso</option>
-            <option value="GASTO">Gasto</option>
-          </select>
-        </div>
-        <div>
-          <label for="startDate">Fecha inicio</label>
-          <input id="startDate" type="date" />
-        </div>
-        <div>
-          <label for="endDate">Fecha fin</label>
-          <input id="endDate" type="date" />
-        </div>
-        <div>
-          <label for="currency">Divisa</label>
-          <select id="currency">
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-            <option value="MXN">MXN</option>
-          </select>
-        </div>
-        <div>
-          <button id="loadData" class="primary">Actualizar datos</button>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="grid grid-3">
-        <div>
-          <span class="muted">Estado de conciliación</span>
-          <div class="status ok" id="statusReconciliation">En línea</div>
-        </div>
-        <div>
-          <span class="muted">Alertas activas</span>
-          <div class="status warn" id="statusAlerts">3 pendientes</div>
-        </div>
-        <div>
-          <span class="muted">Último cierre</span>
-          <div class="status ok" id="statusClose">Hoy 09:30</div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Saldo inicial declarado por el usuario -->
-    <section class="card">
-      <h2>Saldo actual de la cuenta</h2>
-      <p class="muted">Define el dinero real disponible para empezar a calcular presupuestos.</p>
-      <div class="grid-form">
-        <div>
-          <label for="initialBalanceInput">Saldo inicial</label>
-          <select id="accountNameInitialBalance"></select>
-          <input id="initialBalanceInput" type="number" step="0.01" placeholder="Ej: 1250.00" />
+      <section class="card" data-reveal>
+        <h2>Radar financiero</h2>
+        <p class="muted">Indicadores clave del periodo seleccionado.</p>
+        <div class="insights-grid">
+          <div class="insight">
+            <span>Ahorro neto</span>
+            <strong id="insightNetCashflow">€ --</strong>
+          </div>
+          <div class="insight">
+            <span>Tasa de ahorro</span>
+            <strong id="insightSavingsRate">--%</strong>
+          </div>
+          <div class="insight">
+            <span>Mayor gasto</span>
+            <strong id="insightTopCategory">Sin datos</strong>
+          </div>
+          <div class="insight">
+            <span>Variación vs plan</span>
+            <strong id="insightVariance">€ --</strong>
+          </div>
+          <div class="insight">
+            <span>Movimientos</span>
+            <strong id="insightTransactionsCount">0</strong>
+          </div>
         </div>
-        <div style="align-self: end;">
-          <button id="updateInitialBalance" class="primary">Guardar saldo</button>
-        </div>
-      </div>
-      <p class="muted" id="initialBalanceStatus">Sin actualizar.</p>
-    </section>
+      </section>
 
-    <!-- Presupuesto ideal vs. real -->
-    <section class="grid grid-2">
-      <div class="card">
-        <h2>Presupuesto ideal</h2>
-        <p class="muted">Calculado a partir de ingresos y gastos fijos.</p>
-        <div class="metric">
-          <span>Balance esperado</span>
-          <strong id="expectedBalance">€ --</strong>
+      <section class="card" data-reveal>
+        <h2>Panel operativo</h2>
+        <div class="toolbar">
+          <div>
+            <label for="accountName">Cuenta</label>
+            <select id="accountName"></select>
+          </div>
+          <div>
+            <label for="categoryType">Tipo de categoría</label>
+            <select id="categoryType">
+              <option value="INGRESO">Ingreso</option>
+              <option value="GASTO">Gasto</option>
+            </select>
+          </div>
+          <div>
+            <label for="startDate">Fecha inicio</label>
+            <input id="startDate" type="date" />
+          </div>
+          <div>
+            <label for="endDate">Fecha fin</label>
+            <input id="endDate" type="date" />
+          </div>
+          <div>
+            <label for="currency">Divisa</label>
+            <select id="currency">
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+              <option value="MXN">MXN</option>
+            </select>
+          </div>
+          <div>
+            <button id="loadData" class="primary">Actualizar datos</button>
+          </div>
         </div>
         <div class="divider"></div>
-        <div class="list">
-          <div class="list-item">Ingresos fijos: <strong id="fixedIncome">€ --</strong></div>
-          <div class="list-item">Gastos fijos: <strong id="fixedExpense">€ --</strong></div>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Presupuesto real</h2>
-        <p class="muted">Basado en los movimientos registrados en el rango actual.</p>
-        <div class="metric">
-          <span>Balance real</span>
-          <strong id="actualBalance">€ --</strong>
+        <div class="status-grid">
+          <div>
+            <span class="muted">Estado de conciliación</span>
+            <div class="status ok" id="statusReconciliation">En línea</div>
+          </div>
+          <div>
+            <span class="muted">Alertas activas</span>
+            <div class="status warn" id="statusAlerts">0 activas</div>
+          </div>
+          <div>
+            <span class="muted">Último movimiento</span>
+            <div class="status info" id="statusClose">Sin movimientos</div>
+          </div>
         </div>
         <div class="divider"></div>
-        <div class="list">
-          <div class="list-item">Ingresos reales: <strong id="actualIncome">€ --</strong></div>
-          <div class="list-item">Gastos reales: <strong id="actualExpense">€ --</strong></div>
+        <div class="alerts-list" id="alertsList">
+          <div class="alert-item info">Sin alertas activas.</div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Visualización gráfica -->
-    <section class="grid grid-2">
-      <div class="card">
-        <h2>Distribución por categoría</h2>
-        <p class="muted">Totales por categoría en la cuenta seleccionada.</p>
-        <div class="chart-container">
-          <canvas id="totalsChart" aria-label="Gráfico de totales por categoría"></canvas>
+      <section class="card" data-reveal>
+        <h2>Saldo actual de la cuenta</h2>
+        <p class="muted">Define el dinero real disponible para empezar a calcular presupuestos.</p>
+        <div class="grid-form">
+          <div>
+            <label for="initialBalanceInput">Saldo inicial</label>
+            <select id="accountNameInitialBalance"></select>
+            <input id="initialBalanceInput" type="number" step="0.01" placeholder="Ej: 1250.00" />
+          </div>
+          <div style="align-self: end;">
+            <button id="updateInitialBalance" class="primary">Guardar saldo</button>
+          </div>
         </div>
-      </div>
-      <div class="card">
-        <h2>Evolución de movimientos</h2>
-        <p class="muted">Tendencia diaria del rango seleccionado.</p>
-        <div class="chart-container">
-          <canvas id="trendChart" aria-label="Gráfico de evolución de movimientos"></canvas>
-        </div>
-      </div>
-    </section>
+        <p class="muted" id="initialBalanceStatus">Sin actualizar.</p>
+      </section>
 
-    <!-- Gestión de cuentas y movimientos planificados -->
-    <section class="card">
-      <h2>Gestión de cuentas y movimientos planificados</h2>
-      <div class="grid-form">
-        <div>
-          <label for="newAccountName">Nueva cuenta</label>
-          <input id="newAccountName" type="text" placeholder="Ej: Cuenta principal" />
+      <section class="grid grid-2" data-reveal>
+        <div class="card">
+          <h2>Presupuesto ideal</h2>
+          <p class="muted">Calculado a partir de ingresos y gastos fijos.</p>
+          <div class="metric">
+            <span>Balance esperado</span>
+            <strong id="expectedBalance">€ --</strong>
+          </div>
+          <div class="divider"></div>
+          <div class="list">
+            <div class="list-item">Ingresos fijos: <strong id="fixedIncome">€ --</strong></div>
+            <div class="list-item">Gastos fijos: <strong id="fixedExpense">€ --</strong></div>
+          </div>
         </div>
-        <div>
-          <label for="newAccountCurrency">Divisa</label>
-          <select id="newAccountCurrency">
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-            <option value="MXN">MXN</option>
-          </select>
+        <div class="card">
+          <h2>Presupuesto real</h2>
+          <p class="muted">Basado en los movimientos registrados en el rango actual.</p>
+          <div class="metric">
+            <span>Balance real</span>
+            <strong id="actualBalance">€ --</strong>
+          </div>
+          <div class="divider"></div>
+          <div class="list">
+            <div class="list-item">Ingresos reales: <strong id="actualIncome">€ --</strong></div>
+            <div class="list-item">Gastos reales: <strong id="actualExpense">€ --</strong></div>
+          </div>
         </div>
-        <div>
-          <label for="newAccountBalance">Saldo inicial</label>
-          <input id="newAccountBalance" type="number" step="0.01" placeholder="Ej: 800.00" />
-        </div>
-        <div style="align-self: end;">
-          <button id="createAccount" class="primary">Crear cuenta</button>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="grid-form">
-        <div>
-          <label for="plannedName">Nombre del movimiento</label>
-          <input id="plannedName" type="text" placeholder="Ej: Nómina" />
-        </div>
-        <div>
-          <label for="plannedAmount">Importe</label>
-          <input id="plannedAmount" type="number" step="0.01" />
-        </div>
-        <div>
-          <label for="plannedType">Tipo</label>
-          <select id="plannedType">
-            <option value="GASTO_FIJO">Gasto fijo</option>
-            <option value="GASTO_VARIABLE">Gasto variable</option>
-            <option value="INGRESO_VARIABLE">Ingreso variable</option>
-            <option value="INGRESO_FIJO_NOMINA">Ingreso fijo / nómina</option>
-          </select>
-        </div>
-        <div>
-          <label for="plannedPeriodicity">Periodicidad</label>
-          <select id="plannedPeriodicity">
-            <option value="MENSUAL">Mensual</option>
-            <option value="BIMESTRAL">Bimestral</option>
-            <option value="TRIMESTRAL">Trimestral</option>
-            <option value="ANUAL">Anual</option>
-          </select>
-        </div>
-        <div>
-          <label for="plannedStartDate">Fecha inicio</label>
-          <input id="plannedStartDate" type="date" />
-        </div>
-        <div style="align-self: end;">
-          <button id="createPlanned" class="primary">Registrar movimiento</button>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div>
-        <span class="muted">Movimientos planificados activos</span>
-        <div class="list" id="plannedList">
-          <div class="list-item muted">Sin movimientos registrados.</div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Tabla de acciones prioritarias -->
-    <section class="card">
-      <h2>Acciones prioritarias</h2>
-      <p class="muted">Listado de transacciones clave para análisis y seguimiento.</p>
-      <table aria-label="Tabla de acciones prioritarias">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Descripción</th>
-            <th>Categoría</th>
-            <th>Importe</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody id="transactionsTable">
-          <tr>
-            <td colspan="5" class="muted">Sin datos cargados.</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+      <section class="grid grid-3" data-reveal>
+        <div class="card">
+          <h2>Distribución por categoría</h2>
+          <p class="muted">Totales por categoría en la cuenta seleccionada.</p>
+          <div class="chart-container">
+            <canvas id="totalsChart" aria-label="Gráfico de totales por categoría"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Evolución de movimientos</h2>
+          <p class="muted">Tendencia diaria del rango seleccionado.</p>
+          <div class="chart-container">
+            <canvas id="trendChart" aria-label="Gráfico de evolución de movimientos"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Pulso mensual</h2>
+          <p class="muted">Balance mensual del año en curso.</p>
+          <div class="chart-container">
+            <canvas id="monthlyChart" aria-label="Gráfico mensual"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" data-reveal>
+        <h2>Gestión de cuentas y movimientos planificados</h2>
+        <div class="grid-form">
+          <div>
+            <label for="newAccountName">Nueva cuenta</label>
+            <input id="newAccountName" type="text" placeholder="Ej: Cuenta principal" />
+          </div>
+          <div>
+            <label for="newAccountCurrency">Divisa</label>
+            <select id="newAccountCurrency">
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+              <option value="MXN">MXN</option>
+            </select>
+          </div>
+          <div>
+            <label for="newAccountBalance">Saldo inicial</label>
+            <input id="newAccountBalance" type="number" step="0.01" placeholder="Ej: 800.00" />
+          </div>
+          <div style="align-self: end;">
+            <button id="createAccount" class="primary">Crear cuenta</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="grid-form">
+          <div>
+            <label for="plannedName">Nombre del movimiento</label>
+            <input id="plannedName" type="text" placeholder="Ej: Nómina" />
+          </div>
+          <div>
+            <label for="plannedAmount">Importe</label>
+            <input id="plannedAmount" type="number" step="0.01" />
+          </div>
+          <div>
+            <label for="plannedType">Tipo</label>
+            <select id="plannedType">
+              <option value="GASTO_FIJO">Gasto fijo</option>
+              <option value="GASTO_VARIABLE">Gasto variable</option>
+              <option value="INGRESO_VARIABLE">Ingreso variable</option>
+              <option value="INGRESO_FIJO_NOMINA">Ingreso fijo / nómina</option>
+            </select>
+          </div>
+          <div>
+            <label for="plannedPeriodicity">Periodicidad</label>
+            <select id="plannedPeriodicity">
+              <option value="MENSUAL">Mensual</option>
+              <option value="BIMESTRAL">Bimestral</option>
+              <option value="TRIMESTRAL">Trimestral</option>
+              <option value="ANUAL">Anual</option>
+            </select>
+          </div>
+          <div>
+            <label for="plannedStartDate">Fecha inicio</label>
+            <input id="plannedStartDate" type="date" />
+          </div>
+          <div style="align-self: end;">
+            <button id="createPlanned" class="primary">Registrar movimiento</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <span class="muted">Movimientos planificados activos</span>
+          <div class="list" id="plannedList">
+            <div class="list-item muted">Sin movimientos registrados.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" data-reveal>
+        <h2>Acciones prioritarias</h2>
+        <p class="muted">Listado de transacciones clave para análisis y seguimiento.</p>
+        <table aria-label="Tabla de acciones prioritarias">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Descripción</th>
+              <th>Categoría</th>
+              <th>Importe</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="transactionsTable">
+            <tr>
+              <td colspan="5" class="muted">Sin datos cargados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
     </main>
   </div>
 
   <script>
-    // Referencias principales de UI.
     const accountSelect = document.getElementById('accountName');
     const categorySelect = document.getElementById('categoryType');
     const startDateInput = document.getElementById('startDate');
@@ -720,27 +937,49 @@
     const metricBalance = document.getElementById('metricBalance');
     const metricIncome = document.getElementById('metricIncome');
     const metricExpenses = document.getElementById('metricExpenses');
+    const metricNetCashflow = document.getElementById('metricNetCashflow');
+    const metricBalanceTrend = document.getElementById('metricBalanceTrend');
+    const metricNetTrend = document.getElementById('metricNetTrend');
+
+    const insightNetCashflow = document.getElementById('insightNetCashflow');
+    const insightSavingsRate = document.getElementById('insightSavingsRate');
+    const insightTopCategory = document.getElementById('insightTopCategory');
+    const insightVariance = document.getElementById('insightVariance');
+    const insightTransactionsCount = document.getElementById('insightTransactionsCount');
+
+    const statusReconciliation = document.getElementById('statusReconciliation');
+    const statusAlerts = document.getElementById('statusAlerts');
+    const statusClose = document.getElementById('statusClose');
+    const alertsList = document.getElementById('alertsList');
+
+    const chatWindow = document.getElementById('chatWindow');
+    const chatInput = document.getElementById('chatInput');
+    const sendChatButton = document.getElementById('sendChat');
+
+    const recommendationContent = document.getElementById('recommendationContent');
+    const refreshRecommendationsButton = document.getElementById('refreshRecommendations');
+
+    const accountInitialBalanceSelect = document.getElementById('accountNameInitialBalance');
     const initialBalanceInput = document.getElementById('initialBalanceInput');
     const updateInitialBalanceButton = document.getElementById('updateInitialBalance');
     const initialBalanceStatus = document.getElementById('initialBalanceStatus');
+
     const expectedBalance = document.getElementById('expectedBalance');
     const fixedIncome = document.getElementById('fixedIncome');
     const fixedExpense = document.getElementById('fixedExpense');
     const actualBalance = document.getElementById('actualBalance');
     const actualIncome = document.getElementById('actualIncome');
     const actualExpense = document.getElementById('actualExpense');
-    const transactionsTable = document.getElementById('transactionsTable');
-    const chatWindow = document.getElementById('chatWindow');
-    const chatInput = document.getElementById('chatInput');
-    const sendChatButton = document.getElementById('sendChat');
-    const recommendationContent = document.getElementById('recommendationContent');
-    const refreshRecommendationsButton = document.getElementById('refreshRecommendations');
+
     const totalsChart = document.getElementById('totalsChart');
     const trendChart = document.getElementById('trendChart');
+    const monthlyChart = document.getElementById('monthlyChart');
+
     const newAccountName = document.getElementById('newAccountName');
     const newAccountCurrency = document.getElementById('newAccountCurrency');
     const newAccountBalance = document.getElementById('newAccountBalance');
     const createAccountButton = document.getElementById('createAccount');
+
     const plannedName = document.getElementById('plannedName');
     const plannedAmount = document.getElementById('plannedAmount');
     const plannedType = document.getElementById('plannedType');
@@ -748,70 +987,69 @@
     const plannedStartDate = document.getElementById('plannedStartDate');
     const createPlannedButton = document.getElementById('createPlanned');
     const plannedList = document.getElementById('plannedList');
-    const accountInitialBalanceSelect =
-            document.getElementById('accountNameInitialBalance');
 
-    // Mantiene la sesión de chat para conservar contexto entre recargas.
-    const CHAT_SESSION_STORAGE_KEY = 'finances.chat.sessionId';
-    let chatSessionId = localStorage.getItem(CHAT_SESSION_STORAGE_KEY) || '';
+    const transactionsTable = document.getElementById('transactionsTable');
+
+    const CHAT_SESSION_STORAGE_KEY = 'finances.ai.sessionId';
+    let chatSessionId = localStorage.getItem(CHAT_SESSION_STORAGE_KEY);
     let recommendationsTimerId = null;
+    let activeCurrency = 'EUR';
 
-    const today = new Date().toISOString().slice(0, 10);
-    startDateInput.value = startDateInput.value || today;
-    endDateInput.value = endDateInput.value || today;
-    plannedStartDate.value = plannedStartDate.value || today;
+    const today = new Date();
+    const todayIso = today.toISOString().slice(0, 10);
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+    startDateInput.value = startDateInput.value || monthStart;
+    endDateInput.value = endDateInput.value || todayIso;
+    plannedStartDate.value = plannedStartDate.value || todayIso;
 
-    /**
-     * Formatea importes en la divisa seleccionada.
-     */
-    function formatCurrency(value) {
-      const currency = currencySelect.value || 'EUR';
+    function formatCurrency(value, currency = activeCurrency) {
+      const numeric = Number(value || 0);
+      const safeCurrency = currency || 'EUR';
       return new Intl.NumberFormat('es-ES', {
         style: 'currency',
-        currency
-      }).format(value);
+        currency: safeCurrency,
+        maximumFractionDigits: 2
+      }).format(numeric);
     }
 
-    /**
-     * Convierte transacciones en filas de la tabla principal.
-     */
+    function formatPercent(value) {
+      const numeric = Number(value || 0);
+      return `${numeric.toFixed(1)}%`;
+    }
+
+    function appendChatMessage({ sender, message }) {
+      const wrapper = document.createElement('div');
+      wrapper.className = `chat-message ${sender === 'ai' ? 'ai' : 'user'}`;
+      const label = sender === 'ai' ? 'IA' : 'Usuario';
+      wrapper.innerHTML = `
+        <div class="chat-meta">${label}</div>
+        <div>${message}</div>
+      `;
+      chatWindow.appendChild(wrapper);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
     function renderTransactions(transactions) {
       transactionsTable.innerHTML = '';
       if (!transactions.length) {
-        transactionsTable.innerHTML = '<tr><td colspan="5" class="muted">Sin transacciones.</td></tr>';
+        transactionsTable.innerHTML = '<tr><td colspan="5" class="muted">Sin datos cargados.</td></tr>';
         return;
       }
 
-      transactions.forEach((item) => {
+      transactions.forEach((transaction) => {
         const row = document.createElement('tr');
+        const amountClass = transaction.categoryType === 'INGRESO' ? 'positive' : 'negative';
         row.innerHTML = `
-          <td>${item.transactionDate}</td>
-          <td>${item.description || 'Sin descripción'}</td>
-          <td>${item.categoryName} (${item.categoryType})</td>
-          <td>${formatCurrency(item.amount)}</td>
-          <td><span class="status ok">Revisado</span></td>
+          <td>${transaction.transactionDate}</td>
+          <td>${transaction.description || 'Sin descripción'}</td>
+          <td>${transaction.categoryName} (${transaction.categoryType})</td>
+          <td class="amount ${amountClass}">${formatCurrency(transaction.amount)}</td>
+          <td><span class="status ok">Confirmado</span></td>
         `;
         transactionsTable.appendChild(row);
       });
     }
 
-    /**
-     * Inserta un mensaje en el chat.
-     */
-    function appendChatMessage({ sender, message }) {
-      const container = document.createElement('div');
-      container.className = `chat-message ${sender === 'ai' ? 'ai' : ''}`;
-      container.innerHTML = `
-        <div class="chat-meta">${sender === 'ai' ? 'IA' : 'Usuario'}</div>
-        <div>${message}</div>
-      `;
-      chatWindow.appendChild(container);
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-    }
-
-    /**
-     * Renderiza la recomendación actual en la tarjeta de IA.
-     */
     function renderRecommendation(recommendation) {
       if (!recommendation) {
         recommendationContent.textContent = 'Aún no hay recomendaciones generadas.';
@@ -828,9 +1066,73 @@
       `;
     }
 
-    /**
-     * Ajusta el tamaño del canvas al contenedor actual.
-     */
+    function renderAlerts(alerts) {
+      alertsList.innerHTML = '';
+      if (!alerts.length) {
+        alertsList.innerHTML = '<div class="alert-item info">Sin alertas activas.</div>';
+        return;
+      }
+
+      alerts.forEach((alert) => {
+        const item = document.createElement('div');
+        const level = alert.level || 'info';
+        item.className = `alert-item ${level}`;
+        item.innerHTML = `
+          <strong>${alert.title}</strong>
+          <span>${alert.detail}</span>
+        `;
+        alertsList.appendChild(item);
+      });
+    }
+
+    function renderInsights(insights) {
+      if (!insights) {
+        insightNetCashflow.textContent = '€ --';
+        insightSavingsRate.textContent = '--%';
+        insightTopCategory.textContent = 'Sin datos';
+        insightVariance.textContent = '€ --';
+        insightTransactionsCount.textContent = '0';
+        renderAlerts([]);
+        return;
+      }
+
+      const netCashflow = Number(insights.netCashflow || 0);
+      const variance = Number(insights.variance || 0);
+      const topCategory = insights.topExpenseCategory;
+
+      metricNetCashflow.textContent = formatCurrency(netCashflow);
+      insightNetCashflow.textContent = formatCurrency(netCashflow);
+      insightSavingsRate.textContent = formatPercent(insights.savingsRate || 0);
+      insightVariance.textContent = formatCurrency(variance);
+      insightTransactionsCount.textContent = insights.transactionsCount ?? 0;
+      insightTopCategory.textContent = topCategory
+        ? `${topCategory.name} (${formatCurrency(topCategory.amount)})`
+        : 'Sin datos';
+
+      const reconciliation = insights.reconciliationStatus === 'warn' ? 'warn' : 'ok';
+      statusReconciliation.className = `status ${reconciliation}`;
+      statusReconciliation.textContent = reconciliation === 'warn' ? 'Revisar' : 'En línea';
+
+      const warnCount = (insights.alerts || []).filter(alert => alert.level === 'warn').length;
+      statusAlerts.className = `status ${warnCount ? 'warn' : 'ok'}`;
+      statusAlerts.textContent = warnCount
+        ? `${warnCount} activa${warnCount > 1 ? 's' : ''}`
+        : 'Sin alertas';
+
+      statusClose.textContent = insights.lastMovementDate
+        ? new Date(insights.lastMovementDate).toLocaleDateString('es-ES')
+        : 'Sin movimientos';
+
+      metricBalanceTrend.className = `tag ${reconciliation}`;
+      metricBalanceTrend.textContent = reconciliation === 'warn' ? 'Revisar' : 'Estable';
+
+      const netTrend = netCashflow >= 0 ? 'ok' : 'warn';
+      metricNetTrend.className = `tag ${netTrend}`;
+      metricNetTrend.textContent = netCashflow >= 0 ? 'Positivo' : 'Negativo';
+
+      renderAlerts(insights.alerts || []);
+    }
+
     function prepareCanvas(canvas) {
       const rect = canvas.getBoundingClientRect();
       const scale = window.devicePixelRatio || 1;
@@ -841,10 +1143,6 @@
       ctx.scale(scale, scale);
       return { ctx, width: rect.width, height: rect.height };
     }
-
-    /**
-     * Dibuja un gráfico de barras con los totales por categoría.
-     */
     function renderTotalsChart(totals) {
       const entries = Object.entries(totals || {});
       const { ctx, width, height } = prepareCanvas(totalsChart);
@@ -852,7 +1150,7 @@
 
       if (!entries.length) {
         ctx.fillStyle = '#94a3b8';
-        ctx.font = '14px Inter, sans-serif';
+        ctx.font = '14px Manrope, sans-serif';
         ctx.fillText('Sin datos para graficar.', 12, height / 2);
         return;
       }
@@ -864,24 +1162,21 @@
         const barHeight = (Number(value) / maxValue) * (height - 40);
         const x = 20 + index * (barWidth + 12);
         const y = height - barHeight - 20;
-        ctx.fillStyle = '#2563eb';
+        ctx.fillStyle = '#1f5a7a';
         ctx.fillRect(x, y, barWidth, barHeight);
         ctx.fillStyle = '#64748b';
-        ctx.font = '11px Inter, sans-serif';
+        ctx.font = '11px Manrope, sans-serif';
         ctx.fillText(label, x, height - 6);
       });
     }
 
-    /**
-     * Dibuja un gráfico de tendencia con el histórico de movimientos.
-     */
     function renderTrendChart(transactions) {
       const { ctx, width, height } = prepareCanvas(trendChart);
       ctx.clearRect(0, 0, width, height);
 
       if (!transactions.length) {
         ctx.fillStyle = '#94a3b8';
-        ctx.font = '14px Inter, sans-serif';
+        ctx.font = '14px Manrope, sans-serif';
         ctx.fillText('Sin datos para graficar.', 12, height / 2);
         return;
       }
@@ -898,7 +1193,7 @@
       const minValue = Math.min(...values);
       const range = maxValue - minValue || 1;
 
-      ctx.strokeStyle = '#1f3a8a';
+      ctx.strokeStyle = '#123a52';
       ctx.lineWidth = 2;
       ctx.beginPath();
       dates.forEach((date, index) => {
@@ -914,14 +1209,44 @@
       ctx.stroke();
 
       ctx.fillStyle = '#64748b';
-      ctx.font = '11px Inter, sans-serif';
+      ctx.font = '11px Manrope, sans-serif';
       ctx.fillText(dates[0], 12, height - 6);
       ctx.fillText(dates[dates.length - 1], width - 80, height - 6);
     }
 
-    /**
-     * Carga las cuentas disponibles en el selector.
-     */
+    function renderMonthlyChart(monthly) {
+      const { ctx, width, height } = prepareCanvas(monthlyChart);
+      ctx.clearRect(0, 0, width, height);
+
+      if (!monthly.length) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '14px Manrope, sans-serif';
+        ctx.fillText('Sin datos para graficar.', 12, height / 2);
+        return;
+      }
+
+      const maxValue = Math.max(...monthly.map(item => Math.abs(Number(item.balance))));
+      const barWidth = Math.max(20, (width - 40) / monthly.length - 8);
+      const baseline = height - 24;
+
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.moveTo(16, baseline);
+      ctx.lineTo(width - 16, baseline);
+      ctx.stroke();
+
+      monthly.forEach((item, index) => {
+        const value = Number(item.balance || 0);
+        const barHeight = maxValue ? (Math.abs(value) / maxValue) * (height - 60) : 0;
+        const x = 20 + index * (barWidth + 8);
+        const y = value >= 0 ? baseline - barHeight : baseline;
+        ctx.fillStyle = value >= 0 ? '#16a34a' : '#ff6b4a';
+        ctx.fillRect(x, y, barWidth, barHeight);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px Manrope, sans-serif';
+        ctx.fillText(item.month, x, height - 6);
+      });
+    }
     async function loadAccounts() {
       try {
         const response = await fetch('/app/api/accounts');
@@ -932,37 +1257,36 @@
         accountSelect.innerHTML = '';
         accountInitialBalanceSelect.innerHTML = '';
 
+        if (!data.length) {
+          accountSelect.innerHTML = '<option value="">Sin cuentas registradas</option>';
+          return;
+        }
+
         data.forEach((account) => {
           const optionMain = document.createElement('option');
           optionMain.value = account.name;
           optionMain.textContent = `${account.name} (${account.currency})`;
           optionMain.dataset.currency = account.currency;
+          optionMain.dataset.initialBalance = account.initialBalance ?? 0;
           accountSelect.appendChild(optionMain);
 
           const optionBalance = document.createElement('option');
           optionBalance.value = account.name;
           optionBalance.textContent = account.name;
+          optionBalance.dataset.initialBalance = account.initialBalance ?? 0;
           accountInitialBalanceSelect.appendChild(optionBalance);
         });
-        if (data.length) {
-          accountSelect.value = data[0].name;
-          currencySelect.value = data[0].currency;
-          initialBalanceInput.value = data[0].initialBalance || 0;
-          initialBalanceStatus.textContent = 'Saldo cargado desde la cuenta.';
-        } else {
-          const option = document.createElement('option');
-          option.value = '';
-          option.textContent = 'Sin cuentas registradas';
-          accountSelect.appendChild(option);
-        }
+
+        accountSelect.value = data[0].name;
+        currencySelect.value = data[0].currency;
+        activeCurrency = data[0].currency;
+        initialBalanceInput.value = data[0].initialBalance || 0;
+        initialBalanceStatus.textContent = 'Saldo cargado desde la cuenta.';
       } catch (error) {
         console.error(error);
       }
     }
 
-    /**
-     * Crea una cuenta nueva y refresca el selector.
-     */
     async function createAccount() {
       const name = newAccountName.value.trim();
       if (!name) {
@@ -990,10 +1314,6 @@
         createAccountButton.disabled = false;
       }
     }
-
-    /**
-     * Lista los movimientos planificados por cuenta.
-     */
     async function loadPlannedMovements() {
       const accountName = accountSelect.value;
       if (!accountName) {
@@ -1024,9 +1344,6 @@
       }
     }
 
-    /**
-     * Registra un movimiento planificado.
-     */
     async function createPlannedMovement() {
       const accountName = accountSelect.value;
       if (!accountName) {
@@ -1064,9 +1381,6 @@
       }
     }
 
-    /**
-     * Actualiza el saldo inicial en la cuenta seleccionada.
-     */
     async function updateInitialBalance() {
       const accountName = accountInitialBalanceSelect.value;
       if (!accountName) return;
@@ -1076,21 +1390,19 @@
 
       try {
         const response = await fetch(
-                `/app/api/accounts/by-name/${encodeURIComponent(accountName)}/initial-balance`,
-                {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ initialBalance })
-                }
+          `/app/api/accounts/by-name/${encodeURIComponent(accountName)}/initial-balance`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initialBalance })
+          }
         );
 
         if (!response.ok) {
           throw new Error('No se pudo actualizar el saldo.');
         }
 
-        initialBalanceStatus.textContent =
-                `Saldo actualizado para ${accountName}.`;
-
+        initialBalanceStatus.textContent = `Saldo actualizado para ${accountName}.`;
         await loadAccounts();
         await loadDashboardData();
       } catch (error) {
@@ -1100,12 +1412,6 @@
         updateInitialBalanceButton.disabled = false;
       }
     }
-
-
-    /**
-     * Construye el contexto para IA usando DTOs del backend.
-     * Este método se integra con la API cuando esté disponible.
-     */
     async function buildAiContext() {
       const accountName = accountSelect.value;
       const type = categorySelect.value;
@@ -1128,7 +1434,6 @@
       };
 
       try {
-        // TODO: implementar endpoint real en backend.
         const response = await fetch(`/app/api/ai/context?accountName=${encodeURIComponent(accountName)}&startDate=${startDate}&endDate=${endDate}&categoryType=${type}`);
         if (response.ok) {
           const data = await response.json();
@@ -1144,9 +1449,6 @@
       return contextPayload;
     }
 
-    /**
-     * Consulta la última recomendación generada por el backend.
-     */
     async function loadAiRecommendations() {
       const accountName = accountSelect.value;
       if (!accountName) {
@@ -1175,166 +1477,6 @@
       }
     }
 
-    /**
-     * Dispara la consulta a la IA con el contexto necesario.
-     */
-    async function sendChat() {
-      const message = chatInput.value.trim();
-      if (!message) {
-        return;
-      }
-
-      sendChatButton.disabled = true;
-      appendChatMessage({ sender: 'user', message });
-      chatInput.value = '';
-
-      try {
-        const context = await buildAiContext();
-
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': '<YOUR_EXT_API_KEY>'
-          },
-          body: JSON.stringify({
-            sessionId: chatSessionId,
-            message: message,
-            model: 'fast',
-            context
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('El proveedor de IA no respondió. Intenta nuevamente.');
-        }
-
-        const data = await response.json();
-        if (data.sessionId) {
-          chatSessionId = data.sessionId;
-          localStorage.setItem(CHAT_SESSION_STORAGE_KEY, data.sessionId);
-        }
-        appendChatMessage({ sender: 'ai', message: data.reply || 'Respuesta pendiente.' });
-      } catch (error) {
-        appendChatMessage({
-          sender: 'ai',
-          message: 'No se pudo obtener respuesta de IA en este momento.'
-        });
-        console.error(error);
-      } finally {
-        sendChatButton.disabled = false;
-      }
-    }
-
-    /**
-     * Carga los indicadores principales desde el backend.
-     */
-    async function loadDashboardData() {
-      loadButton.disabled = true;
-      const accountName = accountSelect.value;
-      if (!accountName) {
-        loadButton.disabled = false;
-        return;
-      }
-      const type = categorySelect.value;
-      const startDate = startDateInput.value;
-      const endDate = endDateInput.value;
-
-      try {
-        const [balanceRes, totalsRes, transactionsRes, budgetRes] = await Promise.all([
-          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/balance`),
-          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/totals?type=${type}`),
-          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/transactions?startDate=${startDate}&endDate=${endDate}`),
-          fetch(`/app/api/budget/summary?accountName=${encodeURIComponent(accountName)}&startDate=${startDate}&endDate=${endDate}`)
-        ]);
-
-        if (!balanceRes.ok || !totalsRes.ok || !transactionsRes.ok || !budgetRes.ok) {
-          throw new Error('No se pudieron cargar los datos del dashboard.');
-        }
-
-        const balanceData = await balanceRes.json();
-        const totalsData = await totalsRes.json();
-        const transactionsData = await transactionsRes.json();
-        const budgetData = await budgetRes.json();
-
-        const totals = totalsData.totals || totalsData.totalsByCategory || {};
-        const totalIncome = Object.values(totals).reduce((acc, value) => acc + Number(value), 0);
-
-        metricBalance.textContent = formatCurrency(balanceData.balance || 0);
-        metricIncome.textContent = formatCurrency(type === 'INGRESO' ? totalIncome : 0);
-        metricExpenses.textContent = formatCurrency(type === 'GASTO' ? totalIncome : 0);
-        renderTransactions(transactionsData.transactions || []);
-        renderTotalsChart(totals);
-        renderTrendChart(transactionsData.transactions || []);
-        expectedBalance.textContent = formatCurrency(budgetData.expectedBalance || 0);
-        fixedIncome.textContent = formatCurrency(budgetData.fixedIncome || 0);
-        fixedExpense.textContent = formatCurrency(budgetData.fixedExpense || 0);
-        actualBalance.textContent = formatCurrency(budgetData.actualBalance || 0);
-        actualIncome.textContent = formatCurrency(budgetData.actualIncome || 0);
-        actualExpense.textContent = formatCurrency(budgetData.actualExpense || 0);
-        await loadAiRecommendations();
-      } catch (error) {
-        metricBalance.textContent = '€ --';
-        metricIncome.textContent = '€ --';
-        metricExpenses.textContent = '€ --';
-        renderTransactions([]);
-        renderTotalsChart({});
-        renderTrendChart([]);
-        expectedBalance.textContent = '€ --';
-        fixedIncome.textContent = '€ --';
-        fixedExpense.textContent = '€ --';
-        actualBalance.textContent = '€ --';
-        actualIncome.textContent = '€ --';
-        actualExpense.textContent = '€ --';
-        renderRecommendation(null);
-        console.error(error);
-      } finally {
-        loadButton.disabled = false;
-      }
-    }
-
-
-    accountInitialBalanceSelect.addEventListener('change', () => {
-      const selected = accountInitialBalanceSelect.value;
-      const account = [...accountSelect.options]
-              .find(opt => opt.value === selected);
-
-      if (account?.dataset?.initialBalance) {
-        initialBalanceInput.value = account.dataset.initialBalance;
-        initialBalanceStatus.textContent =
-                'Saldo cargado desde la cuenta seleccionada.';
-      }
-    });
-
-    loadButton.addEventListener('click', loadDashboardData);
-    sendChatButton.addEventListener('click', sendChat);
-    createAccountButton.addEventListener('click', createAccount);
-    createPlannedButton.addEventListener('click', createPlannedMovement);
-    updateInitialBalanceButton.addEventListener('click', updateInitialBalance);
-    refreshRecommendationsButton.addEventListener('click', loadAiRecommendations);
-    accountSelect.addEventListener('change', () => {
-      const selectedOption = accountSelect.selectedOptions[0];
-      if (selectedOption && selectedOption.dataset.currency) {
-        currencySelect.value = selectedOption.dataset.currency;
-      }
-      if (selectedOption && selectedOption.dataset.initialBalance) {
-        initialBalanceInput.value = selectedOption.dataset.initialBalance;
-        initialBalanceStatus.textContent = 'Saldo cargado desde la cuenta.';
-      }
-      loadDashboardData();
-      loadPlannedMovements();
-    });
-
-    if (recommendationsTimerId) {
-      clearInterval(recommendationsTimerId);
-    }
-    recommendationsTimerId = setInterval(loadAiRecommendations, 60000);
-
-    loadAccounts().then(() => {
-      loadDashboardData();
-      loadPlannedMovements();
-      loadAiRecommendations();
-    });
     const RAG_BUFFER_KEY = 'finances.rag.buffer';
     const RAG_CHUNK_SIZE = 1000;
 
@@ -1354,7 +1496,7 @@
       return chunk;
     }
 
-    async function sendRagChunk(chunk, title = 'Contexto Web Externa') {
+    async function sendRagChunk(chunk, title = 'Contexto Web Externo') {
       if (!chunk) return;
       await fetch('/app/api/ai/rag', {
         method: 'POST',
@@ -1362,13 +1504,201 @@
         body: JSON.stringify({ title, content: chunk })
       });
     }
-    const raw = `[user] ${message}\\n[ai] ${data.reply || ''}\\n`;
-    appendToRagBuffer(raw);
 
-    const chunk = takeRagChunk();
-    if (chunk) {
-      await sendRagChunk(chunk);
+    async function pushChatToRag(message, reply) {
+      try {
+        const raw = `[user] ${message}\n[ai] ${reply || ''}\n`;
+        appendToRagBuffer(raw);
+        const chunk = takeRagChunk();
+        if (chunk) {
+          await sendRagChunk(chunk, `Chat IA · ${accountSelect.value || 'General'}`);
+        }
+      } catch (error) {
+        console.warn('No se pudo enviar contexto a RAG.', error);
+      }
     }
+
+    async function sendChat() {
+      const message = chatInput.value.trim();
+      if (!message) {
+        return;
+      }
+
+      sendChatButton.disabled = true;
+      appendChatMessage({ sender: 'user', message });
+      chatInput.value = '';
+
+      try {
+        const context = await buildAiContext();
+        const response = await fetch('/app/api/ai/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sessionId: chatSessionId,
+            message: message,
+            model: 'fast',
+            context
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('El proveedor de IA no respondió. Intenta nuevamente.');
+        }
+
+        const data = await response.json();
+        if (data.sessionId) {
+          chatSessionId = data.sessionId;
+          localStorage.setItem(CHAT_SESSION_STORAGE_KEY, data.sessionId);
+        }
+        appendChatMessage({ sender: 'ai', message: data.reply || 'Respuesta pendiente.' });
+        await pushChatToRag(message, data.reply || '');
+      } catch (error) {
+        appendChatMessage({
+          sender: 'ai',
+          message: 'No se pudo obtener respuesta de IA en este momento.'
+        });
+        console.error(error);
+      } finally {
+        sendChatButton.disabled = false;
+      }
+    }
+    async function loadMonthlySummary() {
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        renderMonthlyChart([]);
+        return;
+      }
+      const year = new Date(endDateInput.value || todayIso).getFullYear();
+      try {
+        const response = await fetch(`/app/api/budget/monthly?accountName=${encodeURIComponent(accountName)}&year=${year}`);
+        if (!response.ok) {
+          throw new Error('No se pudo cargar el resumen mensual.');
+        }
+        const data = await response.json();
+        renderMonthlyChart(data || []);
+      } catch (error) {
+        renderMonthlyChart([]);
+        console.error(error);
+      }
+    }
+
+    async function loadDashboardData() {
+      loadButton.disabled = true;
+      const accountName = accountSelect.value;
+      if (!accountName) {
+        loadButton.disabled = false;
+        return;
+      }
+      const type = categorySelect.value;
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+
+      try {
+        const [balanceRes, totalsRes, transactionsRes, budgetRes, insightsRes] = await Promise.all([
+          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/balance`),
+          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/totals?type=${type}`),
+          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/transactions?startDate=${startDate}&endDate=${endDate}`),
+          fetch(`/app/api/budget/summary?accountName=${encodeURIComponent(accountName)}&startDate=${startDate}&endDate=${endDate}`),
+          fetch(`/app/api/dashboard/insights?accountName=${encodeURIComponent(accountName)}&startDate=${startDate}&endDate=${endDate}`)
+        ]);
+
+        if (!balanceRes.ok || !totalsRes.ok || !transactionsRes.ok || !budgetRes.ok) {
+          throw new Error('No se pudieron cargar los datos del dashboard.');
+        }
+
+        const balanceData = await balanceRes.json();
+        const totalsData = await totalsRes.json();
+        const transactionsData = await transactionsRes.json();
+        const budgetData = await budgetRes.json();
+        const insightsData = insightsRes.ok ? await insightsRes.json() : null;
+
+        const totals = totalsData.totals || totalsData.totalsByCategory || {};
+        const netValue = Number(budgetData.actualIncome || 0) - Number(budgetData.actualExpense || 0);
+
+        metricBalance.textContent = formatCurrency(balanceData.balance || 0);
+        metricIncome.textContent = formatCurrency(budgetData.actualIncome || 0);
+        metricExpenses.textContent = formatCurrency(budgetData.actualExpense || 0);
+        metricNetCashflow.textContent = formatCurrency(netValue);
+        renderTransactions(transactionsData.transactions || []);
+        renderTotalsChart(totals);
+        renderTrendChart(transactionsData.transactions || []);
+        expectedBalance.textContent = formatCurrency(budgetData.expectedBalance || 0);
+        fixedIncome.textContent = formatCurrency(budgetData.fixedIncome || 0);
+        fixedExpense.textContent = formatCurrency(budgetData.fixedExpense || 0);
+        actualBalance.textContent = formatCurrency(budgetData.actualBalance || 0);
+        actualIncome.textContent = formatCurrency(budgetData.actualIncome || 0);
+        actualExpense.textContent = formatCurrency(budgetData.actualExpense || 0);
+        renderInsights(insightsData);
+        await loadMonthlySummary();
+        await loadAiRecommendations();
+      } catch (error) {
+        metricBalance.textContent = '€ --';
+        metricIncome.textContent = '€ --';
+        metricExpenses.textContent = '€ --';
+        metricNetCashflow.textContent = '€ --';
+        renderTransactions([]);
+        renderTotalsChart({});
+        renderTrendChart([]);
+        expectedBalance.textContent = '€ --';
+        fixedIncome.textContent = '€ --';
+        fixedExpense.textContent = '€ --';
+        actualBalance.textContent = '€ --';
+        actualIncome.textContent = '€ --';
+        actualExpense.textContent = '€ --';
+        renderInsights(null);
+        console.error(error);
+      } finally {
+        loadButton.disabled = false;
+      }
+    }
+    accountInitialBalanceSelect.addEventListener('change', () => {
+      const selected = accountInitialBalanceSelect.value;
+      const account = [...accountSelect.options]
+        .find(opt => opt.value === selected);
+
+      if (account?.dataset?.initialBalance) {
+        initialBalanceInput.value = account.dataset.initialBalance;
+        initialBalanceStatus.textContent = 'Saldo cargado desde la cuenta seleccionada.';
+      }
+    });
+
+    loadButton.addEventListener('click', loadDashboardData);
+    sendChatButton.addEventListener('click', sendChat);
+    createAccountButton.addEventListener('click', createAccount);
+    createPlannedButton.addEventListener('click', createPlannedMovement);
+    updateInitialBalanceButton.addEventListener('click', updateInitialBalance);
+    refreshRecommendationsButton.addEventListener('click', loadAiRecommendations);
+    accountSelect.addEventListener('change', () => {
+      const selectedOption = accountSelect.selectedOptions[0];
+      if (selectedOption && selectedOption.dataset.currency) {
+        currencySelect.value = selectedOption.dataset.currency;
+        activeCurrency = selectedOption.dataset.currency;
+      }
+      if (selectedOption && selectedOption.dataset.initialBalance) {
+        initialBalanceInput.value = selectedOption.dataset.initialBalance;
+        initialBalanceStatus.textContent = 'Saldo cargado desde la cuenta.';
+      }
+      loadDashboardData();
+      loadPlannedMovements();
+    });
+
+    if (recommendationsTimerId) {
+      clearInterval(recommendationsTimerId);
+    }
+    recommendationsTimerId = setInterval(loadAiRecommendations, 60000);
+
+    loadAccounts().then(() => {
+      loadDashboardData();
+      loadPlannedMovements();
+      loadAiRecommendations();
+    });
+
+    document.querySelectorAll('[data-reveal]').forEach((section, index) => {
+      section.style.setProperty('--delay', `${index * 0.06}s`);
+      section.classList.add('reveal');
+    });
   </script>
 </body>
 </html>

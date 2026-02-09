@@ -1,25 +1,33 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Finances App · Objetivos financieros</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
+
     :root {
       color-scheme: light;
-      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-      --primary: #1e3a8a;
-      --primary-strong: #0f2d72;
-      --primary-soft: #e7edff;
-      --bg: #f6f8fc;
-      --card: #ffffff;
-      --text: #0b1220;
-      --muted: #5b6b83;
-      --border: #e5ebf4;
-      --success: #0f9d58;
-      --shadow: 0 10px 28px rgba(12, 32, 74, 0.08);
-      --radius-lg: 18px;
-      --radius-md: 12px;
+      --font-body: "Manrope", sans-serif;
+      --font-display: "Sora", sans-serif;
+      --primary: #123a52;
+      --primary-strong: #0c2a3a;
+      --accent: #ff6b4a;
+      --accent-soft: #ffe3d8;
+      --teal: #12b5a6;
+      --bg: #f5f1ea;
+      --surface: #ffffff;
+      --surface-2: #f3f6f9;
+      --text: #0f172a;
+      --muted: #5d6a7a;
+      --border: #e1e7ef;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #e11d48;
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      --radius-lg: 22px;
+      --radius-md: 14px;
     }
 
     * {
@@ -28,9 +36,37 @@
 
     body {
       margin: 0;
-      background: var(--bg);
+      font-family: var(--font-body);
       color: var(--text);
-      letter-spacing: 0.1px;
+      background:
+        radial-gradient(circle at top left, rgba(255, 107, 74, 0.15), transparent 45%),
+        radial-gradient(circle at 20% 80%, rgba(18, 181, 166, 0.12), transparent 40%),
+        linear-gradient(140deg, #f7f3ed 0%, #eef3f8 60%, #f9f6f1 100%);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: -120px;
+      right: -80px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(18, 58, 82, 0.18), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -180px;
+      left: -120px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(255, 107, 74, 0.18), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
     }
 
     .app-shell {
@@ -41,9 +77,9 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+      background: rgba(255, 255, 255, 0.86);
+      border-bottom: 1px solid rgba(225, 231, 239, 0.8);
+      backdrop-filter: blur(12px);
     }
 
     .topbar {
@@ -63,23 +99,25 @@
     }
 
     .brand-badge {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(140deg, #123a52, #1f5a7a);
       display: grid;
       place-items: center;
       color: #fff;
       font-weight: 700;
       font-size: 16px;
-      letter-spacing: 0.5px;
-      box-shadow: 0 10px 18px rgba(30, 58, 138, 0.3);
+      letter-spacing: 0.6px;
+      box-shadow: 0 12px 24px rgba(18, 58, 82, 0.35);
+      font-family: var(--font-display);
     }
 
     header h1 {
       margin: 0;
       font-size: 18px;
       font-weight: 700;
+      font-family: var(--font-display);
     }
 
     header .subtitle {
@@ -112,15 +150,15 @@
     }
 
     .nav-link:hover {
-      background: #f1f5ff;
-      border-color: #dfe7ff;
+      background: #edf3f8;
+      border-color: #d7e0eb;
       color: var(--primary);
     }
 
     .nav-link.active {
-      background: var(--primary-soft);
-      color: var(--primary);
-      border-color: #d6e0ff;
+      background: var(--accent-soft);
+      color: var(--primary-strong);
+      border-color: #ffd5c7;
     }
 
     main {
@@ -132,18 +170,48 @@
       gap: 24px;
     }
 
+    .grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
     .card {
-      background: var(--card);
+      background: var(--surface);
       border-radius: var(--radius-lg);
       padding: 20px 22px;
       box-shadow: var(--shadow);
       border: 1px solid var(--border);
     }
 
-    .grid-form {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: var(--font-display);
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric span {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    .metric strong {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: var(--font-display);
     }
 
     label {
@@ -172,32 +240,68 @@
     input:focus,
     select:focus,
     textarea:focus {
-      border-color: #c7d7ff;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+      border-color: #bcd5e8;
+      box-shadow: 0 0 0 3px rgba(18, 58, 82, 0.12);
       outline: none;
     }
 
     button.primary {
-      background: var(--primary);
+      background: linear-gradient(120deg, var(--primary), #1f5a7a);
       color: #fff;
       border: none;
       border-radius: var(--radius-md);
       padding: 10px 16px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(30, 58, 138, 0.22);
+      box-shadow: 0 12px 24px rgba(18, 58, 82, 0.3);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 30px rgba(18, 58, 82, 0.35);
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .grid-form {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
     .goal-card {
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px 14px;
+      border-radius: 16px;
+      padding: 16px;
       background: #f8fafc;
+      display: grid;
+      gap: 10px;
     }
 
-    .goal-card strong {
-      display: block;
-      margin-bottom: 6px;
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(120deg, #12b5a6, #16a34a);
+      transition: width 0.3s ease;
     }
 
     .status {
@@ -212,9 +316,41 @@
       color: var(--success);
     }
 
-    .muted {
-      color: var(--muted);
-      font-size: 13px;
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .reveal {
+      animation: fadeUp 0.6s ease forwards;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal],
+      .reveal {
+        opacity: 1;
+        transform: none;
+        animation: none;
+      }
     }
   </style>
 </head>
@@ -240,63 +376,82 @@
     </header>
 
     <main>
-    <section class="card">
-      <h2>Crear objetivo financiero</h2>
-      <div class="grid-form">
-        <div>
-          <label for="accountSelect">Cuenta</label>
-          <select id="accountSelect"></select>
+      <section class="grid grid-3" data-reveal>
+        <div class="card metric">
+          <span>Objetivos activos</span>
+          <strong id="summaryGoals">0</strong>
+          <div class="muted">En seguimiento</div>
         </div>
-        <div>
-          <label for="goalName">Nombre del objetivo</label>
-          <input id="goalName" type="text" placeholder="Ej: Fondo de emergencia" />
+        <div class="card metric">
+          <span>Avance promedio</span>
+          <strong id="summaryProgress">0%</strong>
+          <div class="muted">Progreso global</div>
         </div>
-        <div>
-          <label for="targetAmount">Meta económica</label>
-          <input id="targetAmount" type="number" step="0.01" />
+        <div class="card metric">
+          <span>Próxima meta</span>
+          <strong id="summaryNextTarget">Sin fecha</strong>
+          <div class="muted">Fecha objetivo más cercana</div>
         </div>
-        <div>
-          <label for="currentAmount">Monto actual</label>
-          <input id="currentAmount" type="number" step="0.01" />
-        </div>
-        <div>
-          <label for="targetDate">Fecha objetivo</label>
-          <input id="targetDate" type="date" />
-        </div>
-        <div>
-          <label for="description">Descripción</label>
-          <textarea id="description" rows="2" placeholder="Detalle del objetivo"></textarea>
-        </div>
-        <div style="align-self: end;">
-          <button id="createGoal" class="primary">Guardar objetivo</button>
-        </div>
-      </div>
-      <p class="muted" id="goalStatus">Sin objetivos nuevos.</p>
-    </section>
+      </section>
 
-    <section class="card">
-      <h2>Actualizar progreso</h2>
-      <div class="grid-form">
-        <div>
-          <label for="goalSelect">Objetivo</label>
-          <select id="goalSelect"></select>
+      <section class="card" data-reveal>
+        <h2>Crear objetivo financiero</h2>
+        <div class="grid-form">
+          <div>
+            <label for="accountSelect">Cuenta</label>
+            <select id="accountSelect"></select>
+          </div>
+          <div>
+            <label for="goalName">Nombre del objetivo</label>
+            <input id="goalName" type="text" placeholder="Ej: Fondo de emergencia" />
+          </div>
+          <div>
+            <label for="targetAmount">Meta económica</label>
+            <input id="targetAmount" type="number" step="0.01" />
+          </div>
+          <div>
+            <label for="currentAmount">Monto actual</label>
+            <input id="currentAmount" type="number" step="0.01" />
+          </div>
+          <div>
+            <label for="targetDate">Fecha objetivo</label>
+            <input id="targetDate" type="date" />
+          </div>
+          <div>
+            <label for="description">Descripción</label>
+            <textarea id="description" rows="2" placeholder="Detalle del objetivo"></textarea>
+          </div>
+          <div style="align-self: end;">
+            <button id="createGoal" class="primary">Guardar objetivo</button>
+          </div>
         </div>
-        <div>
-          <label for="progressAmount">Importe a sumar</label>
-          <input id="progressAmount" type="number" step="0.01" />
-        </div>
-        <div style="align-self: end;">
-          <button id="updateProgress" class="primary">Registrar progreso</button>
-        </div>
-      </div>
-      <p class="muted" id="progressStatus">Sin actualizaciones.</p>
-    </section>
+        <p class="muted" id="goalStatus">Sin objetivos nuevos.</p>
+      </section>
 
-    <section class="card">
-      <h2>Objetivos activos</h2>
-      <div id="goalsList" class="grid-form"></div>
-    </section>
-  </main>
+      <section class="card" data-reveal>
+        <h2>Actualizar progreso</h2>
+        <div class="grid-form">
+          <div>
+            <label for="goalSelect">Objetivo</label>
+            <select id="goalSelect"></select>
+          </div>
+          <div>
+            <label for="progressAmount">Importe a sumar</label>
+            <input id="progressAmount" type="number" step="0.01" />
+          </div>
+          <div style="align-self: end;">
+            <button id="updateProgress" class="primary">Registrar progreso</button>
+          </div>
+        </div>
+        <p class="muted" id="progressStatus">Sin actualizaciones.</p>
+      </section>
+
+      <section class="card" data-reveal>
+        <h2>Objetivos activos</h2>
+        <div id="goalsList" class="grid-form"></div>
+      </section>
+    </main>
+  </div>
 
   <script>
     const accountSelect = document.getElementById('accountSelect');
@@ -313,12 +468,13 @@
     const updateProgress = document.getElementById('updateProgress');
     const progressStatus = document.getElementById('progressStatus');
 
+    const summaryGoals = document.getElementById('summaryGoals');
+    const summaryProgress = document.getElementById('summaryProgress');
+    const summaryNextTarget = document.getElementById('summaryNextTarget');
+
     const today = new Date().toISOString().slice(0, 10);
     targetDate.value = targetDate.value || today;
 
-    /**
-     * Carga cuentas disponibles en el desplegable.
-     */
     async function loadAccounts() {
       const response = await fetch('/app/api/accounts');
       const data = await response.json();
@@ -331,9 +487,6 @@
       });
     }
 
-    /**
-     * Lista objetivos financieros de la cuenta seleccionada.
-     */
     async function loadGoals() {
       const accountName = accountSelect.value;
       if (!accountName) {
@@ -346,17 +499,40 @@
       goalSelect.innerHTML = '';
       if (!goals.length) {
         goalsList.innerHTML = '<p class="muted">Sin objetivos registrados.</p>';
+        summaryGoals.textContent = '0';
+        summaryProgress.textContent = '0%';
+        summaryNextTarget.textContent = 'Sin fecha';
         return;
       }
 
+      let totalProgress = 0;
+      let nextTarget = null;
+
       goals.forEach((goal) => {
+        const progress = goal.targetAmount > 0
+          ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
+          : 0;
+        totalProgress += progress;
+
+        if (goal.targetDate) {
+          const target = new Date(goal.targetDate);
+          if (!nextTarget || target < nextTarget) {
+            nextTarget = target;
+          }
+        }
+
         const card = document.createElement('div');
         card.className = 'goal-card';
         card.innerHTML = `
-          <strong>${goal.name}</strong>
+          <div class="goal-header">
+            <strong>${goal.name}</strong>
+            <span class="status">${progress}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width: ${progress}%;"></div>
+          </div>
           <div class="muted">Meta: ${goal.targetAmount} · Avance: ${goal.currentAmount}</div>
-          <div class="muted">Fecha objetivo: ${goal.targetDate}</div>
-          <span class="status">Activo</span>
+          <div class="muted">Fecha objetivo: ${goal.targetDate || 'Sin fecha'}</div>
         `;
         goalsList.appendChild(card);
 
@@ -365,11 +541,14 @@
         option.textContent = `${goal.name} (${goal.currentAmount}/${goal.targetAmount})`;
         goalSelect.appendChild(option);
       });
+
+      summaryGoals.textContent = goals.length;
+      summaryProgress.textContent = `${Math.round(totalProgress / goals.length)}%`;
+      summaryNextTarget.textContent = nextTarget
+        ? nextTarget.toLocaleDateString('es-ES')
+        : 'Sin fecha';
     }
 
-    /**
-     * Crea un nuevo objetivo financiero.
-     */
     async function createNewGoal() {
       const accountName = accountSelect.value;
       if (!accountName || !goalName.value.trim() || !targetAmount.value) {
@@ -407,9 +586,6 @@
       }
     }
 
-    /**
-     * Suma progreso a un objetivo seleccionado.
-     */
     async function registerProgress() {
       const goalId = goalSelect.value;
       if (!goalId || !progressAmount.value) {
@@ -442,6 +618,11 @@
     updateProgress.addEventListener('click', registerProgress);
 
     loadAccounts().then(loadGoals);
+
+    document.querySelectorAll('[data-reveal]').forEach((section, index) => {
+      section.style.setProperty('--delay', `${index * 0.06}s`);
+      section.classList.add('reveal');
+    });
   </script>
 </body>
 </html>

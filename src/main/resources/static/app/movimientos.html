@@ -1,25 +1,33 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Finances App · Ingresos y gastos</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap');
+
     :root {
       color-scheme: light;
-      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-      --primary: #1e3a8a;
-      --primary-strong: #0f2d72;
-      --primary-soft: #e7edff;
-      --bg: #f6f8fc;
-      --card: #ffffff;
-      --text: #0b1220;
-      --muted: #5b6b83;
-      --border: #e5ebf4;
-      --success: #0f9d58;
-      --shadow: 0 10px 28px rgba(12, 32, 74, 0.08);
-      --radius-lg: 18px;
-      --radius-md: 12px;
+      --font-body: "Manrope", sans-serif;
+      --font-display: "Sora", sans-serif;
+      --primary: #123a52;
+      --primary-strong: #0c2a3a;
+      --accent: #ff6b4a;
+      --accent-soft: #ffe3d8;
+      --teal: #12b5a6;
+      --bg: #f5f1ea;
+      --surface: #ffffff;
+      --surface-2: #f3f6f9;
+      --text: #0f172a;
+      --muted: #5d6a7a;
+      --border: #e1e7ef;
+      --success: #16a34a;
+      --warning: #f59e0b;
+      --danger: #e11d48;
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      --radius-lg: 22px;
+      --radius-md: 14px;
     }
 
     * {
@@ -28,9 +36,37 @@
 
     body {
       margin: 0;
-      background: var(--bg);
+      font-family: var(--font-body);
       color: var(--text);
-      letter-spacing: 0.1px;
+      background:
+        radial-gradient(circle at top left, rgba(255, 107, 74, 0.15), transparent 45%),
+        radial-gradient(circle at 20% 80%, rgba(18, 181, 166, 0.12), transparent 40%),
+        linear-gradient(140deg, #f7f3ed 0%, #eef3f8 60%, #f9f6f1 100%);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: -120px;
+      right: -80px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(18, 58, 82, 0.18), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -180px;
+      left: -120px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(255, 107, 74, 0.18), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
     }
 
     .app-shell {
@@ -41,9 +77,9 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+      background: rgba(255, 255, 255, 0.86);
+      border-bottom: 1px solid rgba(225, 231, 239, 0.8);
+      backdrop-filter: blur(12px);
     }
 
     .topbar {
@@ -63,23 +99,25 @@
     }
 
     .brand-badge {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(140deg, #123a52, #1f5a7a);
       display: grid;
       place-items: center;
       color: #fff;
       font-weight: 700;
       font-size: 16px;
-      letter-spacing: 0.5px;
-      box-shadow: 0 10px 18px rgba(30, 58, 138, 0.3);
+      letter-spacing: 0.6px;
+      box-shadow: 0 12px 24px rgba(18, 58, 82, 0.35);
+      font-family: var(--font-display);
     }
 
     header h1 {
       margin: 0;
       font-size: 18px;
       font-weight: 700;
+      font-family: var(--font-display);
     }
 
     header .subtitle {
@@ -112,15 +150,15 @@
     }
 
     .nav-link:hover {
-      background: #f1f5ff;
-      border-color: #dfe7ff;
+      background: #edf3f8;
+      border-color: #d7e0eb;
       color: var(--primary);
     }
 
     .nav-link.active {
-      background: var(--primary-soft);
-      color: var(--primary);
-      border-color: #d6e0ff;
+      background: var(--accent-soft);
+      color: var(--primary-strong);
+      border-color: #ffd5c7;
     }
 
     main {
@@ -132,18 +170,48 @@
       gap: 24px;
     }
 
+    .grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
     .card {
-      background: var(--card);
+      background: var(--surface);
       border-radius: var(--radius-lg);
       padding: 20px 22px;
       box-shadow: var(--shadow);
       border: 1px solid var(--border);
     }
 
-    .grid-form {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: var(--font-display);
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric span {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    .metric strong {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: var(--font-display);
     }
 
     label {
@@ -172,24 +240,36 @@
     input:focus,
     select:focus,
     textarea:focus {
-      border-color: #c7d7ff;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+      border-color: #bcd5e8;
+      box-shadow: 0 0 0 3px rgba(18, 58, 82, 0.12);
       outline: none;
     }
 
     button.primary {
-      background: var(--primary);
+      background: linear-gradient(120deg, var(--primary), #1f5a7a);
       color: #fff;
       border: none;
       border-radius: var(--radius-md);
       padding: 10px 16px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(30, 58, 138, 0.22);
+      box-shadow: 0 12px 24px rgba(18, 58, 82, 0.3);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 30px rgba(18, 58, 82, 0.35);
+    }
+
+    button.primary:disabled {
+      background: #9aa8c7;
+      cursor: not-allowed;
+      box-shadow: none;
     }
 
     button.danger {
-      background: #dc2626;
+      background: #e11d48;
       color: #fff;
       border: none;
       border-radius: var(--radius-md);
@@ -198,8 +278,7 @@
       cursor: pointer;
     }
 
-    button.danger:disabled,
-    button.primary:disabled {
+    button.danger:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
@@ -225,6 +304,10 @@
       letter-spacing: 0.08em;
     }
 
+    tbody tr:nth-child(even) {
+      background: #f9fbfd;
+    }
+
     .status {
       display: inline-flex;
       align-items: center;
@@ -237,13 +320,66 @@
       color: var(--success);
     }
 
+    .amount.positive {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .amount.negative {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
     .muted {
       color: var(--muted);
       font-size: 13px;
     }
 
+    .grid-form {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
     .actions-cell {
       text-align: right;
+    }
+
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .reveal {
+      animation: fadeUp 0.6s ease forwards;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal],
+      .reveal {
+        opacity: 1;
+        transform: none;
+        animation: none;
+      }
     }
   </style>
 </head>
@@ -269,77 +405,98 @@
     </header>
 
     <main>
-    <section class="card">
-      <h2>Nuevo movimiento</h2>
-      <p class="muted">Utiliza esta sección para confirmar ingresos y gastos reales.</p>
-      <div class="grid-form">
-        <div>
-          <label for="accountSelect">Cuenta</label>
-          <select id="accountSelect"></select>
+      <section class="grid grid-3" data-reveal>
+        <div class="card metric">
+          <span>Balance actual</span>
+          <strong id="summaryBalance">€ --</strong>
+          <div class="muted" id="summaryBalanceMeta">Cuenta principal</div>
         </div>
-        <div>
-          <label for="categoryType">Tipo</label>
-          <select id="categoryType">
-            <option value="INGRESO">Ingreso</option>
-            <option value="GASTO">Gasto</option>
-          </select>
+        <div class="card metric">
+          <span>Flujo neto del mes</span>
+          <strong id="summaryNetCashflow">€ --</strong>
+          <div class="muted" id="summaryNetMeta">Periodo actual</div>
         </div>
-        <div>
-          <label for="categoryName">Categoría</label>
-          <input id="categoryName" type="text" placeholder="Ej: Nómina / Alquiler" />
+        <div class="card metric">
+          <span>Alertas activas</span>
+          <strong id="summaryAlerts">0</strong>
+          <div class="muted" id="summaryLastMovement">Sin movimientos</div>
         </div>
-        <div>
-          <label for="amount">Importe</label>
-          <input id="amount" type="number" step="0.01" />
-        </div>
-        <div>
-          <label for="transactionDate">Fecha</label>
-          <input id="transactionDate" type="date" />
-        </div>
-        <div>
-          <label for="goalSelect">Objetivo asociado</label>
-          <select id="goalSelect">
-            <option value="">Sin objetivo</option>
-          </select>
-        </div>
-        <div>
-          <label for="description">Descripción</label>
-          <textarea id="description" rows="2" placeholder="Detalle del movimiento"></textarea>
-        </div>
-        <div style="align-self: end;">
-          <button id="saveTransaction" class="primary">Registrar</button>
-        </div>
-      </div>
-      <p class="muted" id="transactionStatus">Sin movimientos recientes.</p>
-    </section>
+      </section>
 
-    <section class="card">
-      <h2>Movimientos recientes</h2>
-      <p class="muted">Listado del periodo actual para confirmar cobros y pagos.</p>
-      <table aria-label="Tabla de movimientos recientes">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Descripción</th>
-            <th>Categoría</th>
-            <th>Importe</th>
-            <th>Estado</th>
-            <th class="actions-cell">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="transactionsTable">
-          <tr>
-            <td colspan="6" class="muted">Sin movimientos.</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-  </main>
+      <section class="card" data-reveal>
+        <h2>Nuevo movimiento</h2>
+        <p class="muted">Utiliza esta sección para confirmar ingresos y gastos reales.</p>
+        <div class="grid-form">
+          <div>
+            <label for="accountSelect">Cuenta</label>
+            <select id="accountSelect"></select>
+          </div>
+          <div>
+            <label for="categoryType">Tipo</label>
+            <select id="categoryType">
+              <option value="INGRESO">Ingreso</option>
+              <option value="GASTO">Gasto</option>
+            </select>
+          </div>
+          <div>
+            <label for="categoryName">Categoría</label>
+            <input id="categoryName" type="text" list="categoryOptions" placeholder="Ej: Nómina / Alquiler" />
+            <datalist id="categoryOptions"></datalist>
+          </div>
+          <div>
+            <label for="amount">Importe</label>
+            <input id="amount" type="number" step="0.01" />
+          </div>
+          <div>
+            <label for="transactionDate">Fecha</label>
+            <input id="transactionDate" type="date" />
+          </div>
+          <div>
+            <label for="goalSelect">Objetivo asociado</label>
+            <select id="goalSelect">
+              <option value="">Sin objetivo</option>
+            </select>
+          </div>
+          <div>
+            <label for="description">Descripción</label>
+            <textarea id="description" rows="2" placeholder="Detalle del movimiento"></textarea>
+          </div>
+          <div style="align-self: end;">
+            <button id="saveTransaction" class="primary">Registrar</button>
+          </div>
+        </div>
+        <p class="muted" id="transactionStatus">Sin movimientos recientes.</p>
+      </section>
+
+      <section class="card" data-reveal>
+        <h2>Movimientos recientes</h2>
+        <p class="muted">Listado del periodo actual para confirmar cobros y pagos.</p>
+        <table aria-label="Tabla de movimientos recientes">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Descripción</th>
+              <th>Categoría</th>
+              <th>Importe</th>
+              <th>Estado</th>
+              <th class="actions-cell">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="transactionsTable">
+            <tr>
+              <td colspan="6" class="muted">Sin movimientos.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
 
   <script>
     const accountSelect = document.getElementById('accountSelect');
     const categoryType = document.getElementById('categoryType');
     const categoryName = document.getElementById('categoryName');
+    const categoryOptions = document.getElementById('categoryOptions');
     const amount = document.getElementById('amount');
     const transactionDate = document.getElementById('transactionDate');
     const description = document.getElementById('description');
@@ -348,12 +505,28 @@
     const transactionsTable = document.getElementById('transactionsTable');
     const goalSelect = document.getElementById('goalSelect');
 
-    const today = new Date().toISOString().slice(0, 10);
-    transactionDate.value = transactionDate.value || today;
+    const summaryBalance = document.getElementById('summaryBalance');
+    const summaryBalanceMeta = document.getElementById('summaryBalanceMeta');
+    const summaryNetCashflow = document.getElementById('summaryNetCashflow');
+    const summaryNetMeta = document.getElementById('summaryNetMeta');
+    const summaryAlerts = document.getElementById('summaryAlerts');
+    const summaryLastMovement = document.getElementById('summaryLastMovement');
 
-    /**
-     * Carga cuentas disponibles en el desplegable.
-     */
+    const today = new Date();
+    const todayIso = today.toISOString().slice(0, 10);
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
+    transactionDate.value = transactionDate.value || todayIso;
+    let activeCurrency = 'EUR';
+
+    function formatCurrency(value, currency = activeCurrency) {
+      const numeric = Number(value || 0);
+      return new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 2
+      }).format(numeric);
+    }
+
     async function loadAccounts() {
       const response = await fetch('/app/api/accounts');
       const data = await response.json();
@@ -362,13 +535,15 @@
         const option = document.createElement('option');
         option.value = account.name;
         option.textContent = `${account.name} (${account.currency})`;
+        option.dataset.currency = account.currency;
         accountSelect.appendChild(option);
       });
+      if (data.length) {
+        activeCurrency = data[0].currency;
+        summaryBalanceMeta.textContent = data[0].name;
+      }
     }
 
-    /**
-     * Carga objetivos financieros para asociarlos opcionalmente.
-     */
     async function loadGoals() {
       const accountName = accountSelect.value;
       if (!accountName) {
@@ -385,9 +560,55 @@
       });
     }
 
-    /**
-     * Elimina una transacción registrada usando el servicio backend.
-     */
+    async function loadCategories() {
+      const type = categoryType.value;
+      categoryOptions.innerHTML = '';
+      try {
+        const response = await fetch(`/app/api/categories?type=${type}`);
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        data.forEach((category) => {
+          const option = document.createElement('option');
+          option.value = category;
+          categoryOptions.appendChild(option);
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function loadSummary() {
+      const accountName = accountSelect.value;
+      if (!accountName) return;
+
+      try {
+        const [balanceRes, insightsRes] = await Promise.all([
+          fetch(`/app/api/accounts/by-name/${encodeURIComponent(accountName)}/balance`),
+          fetch(`/app/api/dashboard/insights?accountName=${encodeURIComponent(accountName)}&startDate=${monthStart}&endDate=${todayIso}`)
+        ]);
+
+        if (balanceRes.ok) {
+          const balanceData = await balanceRes.json();
+          summaryBalance.textContent = formatCurrency(balanceData.balance || 0);
+        }
+
+        if (insightsRes.ok) {
+          const insights = await insightsRes.json();
+          summaryNetCashflow.textContent = formatCurrency(insights.netCashflow || 0);
+          summaryNetMeta.textContent = insights.reconciliationStatus === 'warn' ? 'Revisar' : 'En línea';
+          const warnCount = (insights.alerts || []).filter(alert => alert.level === 'warn').length;
+          summaryAlerts.textContent = warnCount;
+          summaryLastMovement.textContent = insights.lastMovementDate
+            ? `Último: ${new Date(insights.lastMovementDate).toLocaleDateString('es-ES')}`
+            : 'Sin movimientos';
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     async function deleteTransaction(transactionId) {
       if (!transactionId) {
         return;
@@ -411,24 +632,22 @@
         transactionStatus.textContent = 'Movimiento eliminado correctamente.';
         await loadTransactions();
         await loadGoals();
+        await loadSummary();
       } catch (error) {
         transactionStatus.textContent = 'No se pudo eliminar el movimiento.';
         console.error(error);
       }
     }
 
-    /**
-     * Crea una celda de tabla con texto seguro.
-     */
-    function createTextCell(text) {
+    function createTextCell(text, className = '') {
       const cell = document.createElement('td');
       cell.textContent = text;
+      if (className) {
+        cell.className = className;
+      }
       return cell;
     }
 
-    /**
-     * Crea la celda de estado con estilos.
-     */
     function createStatusCell() {
       const cell = document.createElement('td');
       const badge = document.createElement('span');
@@ -438,9 +657,6 @@
       return cell;
     }
 
-    /**
-     * Crea la celda de acciones con el botón de eliminar.
-     */
     function createActionsCell(transactionId) {
       const cell = document.createElement('td');
       cell.className = 'actions-cell';
@@ -457,25 +673,20 @@
       return cell;
     }
 
-    /**
-     * Crea una fila completa para la tabla de movimientos.
-     */
     function createTransactionRow(transaction) {
       const row = document.createElement('tr');
+      const amountClass = transaction.categoryType === 'INGRESO' ? 'amount positive' : 'amount negative';
       row.appendChild(createTextCell(transaction.transactionDate));
       row.appendChild(createTextCell(transaction.description || 'Sin descripción'));
       row.appendChild(
         createTextCell(`${transaction.categoryName} (${transaction.categoryType})`)
       );
-      row.appendChild(createTextCell(transaction.amount));
+      row.appendChild(createTextCell(formatCurrency(transaction.amount), amountClass));
       row.appendChild(createStatusCell());
       row.appendChild(createActionsCell(transaction.id));
       return row;
     }
 
-    /**
-     * Registra un movimiento real.
-     */
     async function registerTransaction() {
       const accountName = accountSelect.value;
       if (!accountName || !categoryName.value.trim() || !amount.value) {
@@ -517,6 +728,7 @@
         description.value = '';
         await loadTransactions();
         await loadGoals();
+        await loadSummary();
       } catch (error) {
         transactionStatus.textContent = 'No se pudo registrar el movimiento.';
         console.error(error);
@@ -525,21 +737,14 @@
       }
     }
 
-    /**
-     * Carga movimientos recientes del mes actual.
-     */
     async function loadTransactions() {
       const accountName = accountSelect.value;
       if (!accountName) {
         return;
       }
-      const startDate = new Date();
-      startDate.setDate(1);
-      const start = startDate.toISOString().slice(0, 10);
-      const end = today;
 
       const response = await fetch(
-        `/app/api/accounts/by-name/${encodeURIComponent(accountName)}/transactions?startDate=${start}&endDate=${end}`
+        `/app/api/accounts/by-name/${encodeURIComponent(accountName)}/transactions?startDate=${monthStart}&endDate=${todayIso}`
       );
       const data = await response.json();
 
@@ -555,14 +760,30 @@
     }
 
     accountSelect.addEventListener('change', async () => {
+      const selectedOption = accountSelect.selectedOptions[0];
+      if (selectedOption?.dataset?.currency) {
+        activeCurrency = selectedOption.dataset.currency;
+        summaryBalanceMeta.textContent = selectedOption.value;
+      }
       await loadGoals();
+      await loadCategories();
       await loadTransactions();
+      await loadSummary();
     });
+
+    categoryType.addEventListener('change', loadCategories);
     saveTransaction.addEventListener('click', registerTransaction);
 
     loadAccounts().then(async () => {
       await loadGoals();
+      await loadCategories();
       await loadTransactions();
+      await loadSummary();
+    });
+
+    document.querySelectorAll('[data-reveal]').forEach((section, index) => {
+      section.style.setProperty('--delay', `${index * 0.06}s`);
+      section.classList.add('reveal');
     });
   </script>
 </body>

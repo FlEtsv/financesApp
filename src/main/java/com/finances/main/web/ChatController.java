@@ -1,7 +1,7 @@
 package com.finances.main.web;
 
-import com.finances.main.service.ai.AiChatService;
 import com.finances.main.service.ai.ExtChatClient;
+import com.finances.main.service.ai.ExternalAiUnavailableException;
 import com.finances.main.web.dto.AiDtos.AiChatRequest;
 import com.finances.main.web.dto.AiDtos.AiChatResponse;
 import org.springframework.http.HttpStatus;
@@ -30,6 +30,14 @@ public class ChatController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El campo 'message' es obligatorio.");
         }
 
-        return extChatClient.sendChat(request);
+        try {
+            return extChatClient.sendChat(request);
+        } catch (ExternalAiUnavailableException ex) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "El proveedor de IA no respondió. Revisa la configuración.",
+                ex
+            );
+        }
     }
 }

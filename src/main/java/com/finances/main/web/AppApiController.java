@@ -5,6 +5,8 @@ import com.finances.main.model.PlannedMovement;
 import com.finances.main.model.Transaction;
 import com.finances.main.service.AccountService;
 import com.finances.main.service.BudgetService;
+import com.finances.main.service.CategoryService;
+import com.finances.main.service.DashboardInsightService;
 import com.finances.main.service.FinancialGoalService;
 import com.finances.main.service.LedgerService;
 import com.finances.main.service.PlannedMovementService;
@@ -23,6 +25,7 @@ import com.finances.main.web.dto.AiDtos.AiContextResponse;
 import com.finances.main.web.dto.AiDtos.AiRecommendationResponse;
 import com.finances.main.web.dto.BudgetDtos.BudgetSummaryResponse;
 import com.finances.main.web.dto.BudgetDtos.MonthlySummaryResponse;
+import com.finances.main.web.dto.DashboardDtos.DashboardInsightsResponse;
 import com.finances.main.web.dto.FinancialGoalDtos.FinancialGoalCreateRequest;
 import com.finances.main.web.dto.FinancialGoalDtos.FinancialGoalProgressRequest;
 import com.finances.main.web.dto.FinancialGoalDtos.FinancialGoalResponse;
@@ -36,6 +39,7 @@ import com.finances.main.web.dto.LedgerResponses.TransactionsResponse;
 import com.finances.main.web.dto.PlannedMovementDtos.FixedMovementsOverview;
 import com.finances.main.web.dto.PlannedMovementDtos.PlannedMovementRequest;
 import com.finances.main.web.dto.PlannedMovementDtos.PlannedMovementResponse;
+import com.finances.main.web.dto.RagDtos;
 import com.finances.main.web.dto.TransactionDtos.TransactionCreateRequest;
 import com.finances.main.web.dto.TransactionDtos.TransactionResponse;
 import java.math.BigDecimal;
@@ -72,10 +76,12 @@ public class AppApiController {
     private static final Logger log = LoggerFactory.getLogger(AppApiController.class);
     private final LedgerService ledgerService;
     private final AccountService accountService;
+    private final CategoryService categoryService;
     private final PlannedMovementService plannedMovementService;
     private final TransactionService transactionService;
     private final FinancialGoalService financialGoalService;
     private final BudgetService budgetService;
+    private final DashboardInsightService dashboardInsightService;
     private final AiContextService aiContextService;
     private final ExtChatClient extChatClient;
     private final AiRecommendationService aiRecommendationService;
@@ -84,10 +90,12 @@ public class AppApiController {
     public AppApiController(
         LedgerService ledgerService,
         AccountService accountService,
+        CategoryService categoryService,
         PlannedMovementService plannedMovementService,
         TransactionService transactionService,
         FinancialGoalService financialGoalService,
         BudgetService budgetService,
+        DashboardInsightService dashboardInsightService,
         AiContextService aiContextService,
         ExtChatClient extChatClient,
         AiRecommendationService aiRecommendationService,
@@ -95,10 +103,12 @@ public class AppApiController {
     ) {
         this.ledgerService = ledgerService;
         this.accountService = accountService;
+        this.categoryService = categoryService;
         this.plannedMovementService = plannedMovementService;
         this.transactionService = transactionService;
         this.financialGoalService = financialGoalService;
         this.budgetService = budgetService;
+        this.dashboardInsightService = dashboardInsightService;
         this.aiContextService = aiContextService;
         this.extChatClient = extChatClient;
         this.aiRecommendationService = aiRecommendationService;
@@ -193,6 +203,16 @@ public class AppApiController {
                 account.getInitialBalance(),
                 account.getCreatedAt()
             ))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Lista categorías por tipo para autocompletado.
+     */
+    @GetMapping("/categories")
+    public List<String> listCategories(@RequestParam CategoryType type) {
+        return categoryService.listByType(type).stream()
+            .map(category -> category.getName())
             .collect(Collectors.toList());
     }
 
@@ -390,6 +410,18 @@ public class AppApiController {
     }
 
     /**
+     * Devuelve indicadores y alertas para el dashboard principal.
+     */
+    @GetMapping("/dashboard/insights")
+    public DashboardInsightsResponse getDashboardInsights(
+        @RequestParam String accountName,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        return dashboardInsightService.buildInsights(accountName, startDate, endDate);
+    }
+
+    /**
      * Construye el resumen presupuestario para un rango de fechas.
      */
     @GetMapping("/budget/summary")
@@ -481,7 +513,7 @@ public class AppApiController {
     }
 
     @PostMapping("/ai/rag")
-    public ResponseEntity<?> uploadRag(@RequestBody RagDocumentRequest request) {
+    public ResponseEntity<?> uploadRag(@RequestBody RagDtos.RagDocumentRequest request) {
         if (request == null || request.content() == null || request.content().isBlank()) {
             return ResponseEntity.badRequest().build();
         }

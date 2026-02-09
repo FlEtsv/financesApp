@@ -9,6 +9,8 @@ import com.finances.main.model.Transaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -75,5 +77,30 @@ class TransactionRepositoryTest {
         List<Object[]> totals = transactionRepository.totalsByCategory(account.getId(), CategoryType.GASTO);
 
         assertThat(totals).hasSize(2);
+    }
+
+    @Test
+    void totalsByCategoryWithinDateRangeByAccountName() {
+        Account account = accountRepository.save(new Account("Cuenta Principal", "USD"));
+        Category food = categoryRepository.save(new Category("Comida", CategoryType.GASTO));
+        Category travel = categoryRepository.save(new Category("Viajes", CategoryType.GASTO));
+
+        transactionRepository.save(new Transaction(account, food, new BigDecimal("80.00"), LocalDate.of(2024, 5, 2), "Mercado"));
+        transactionRepository.save(new Transaction(account, travel, new BigDecimal("120.00"), LocalDate.of(2024, 6, 3), "Vuelo"));
+        transactionRepository.save(new Transaction(account, food, new BigDecimal("20.00"), LocalDate.of(2024, 7, 1), "Cafetería"));
+
+        List<Object[]> totals = transactionRepository.totalsByCategoryAndAccountNameWithinDateRange(
+            "Cuenta Principal",
+            CategoryType.GASTO,
+            LocalDate.of(2024, 5, 1),
+            LocalDate.of(2024, 6, 30)
+        );
+
+        Map<String, BigDecimal> totalsMap = totals.stream()
+            .collect(Collectors.toMap(row -> (String) row[0], row -> (BigDecimal) row[1]));
+
+        assertThat(totalsMap).containsEntry("Comida", new BigDecimal("80.00"));
+        assertThat(totalsMap).containsEntry("Viajes", new BigDecimal("120.00"));
+        assertThat(totalsMap).doesNotContainKey("Cafetería");
     }
 }

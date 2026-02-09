@@ -20,13 +20,14 @@ import org.springframework.web.client.RestClientResponseException;
 public class RagClientService {
     private static final Logger log = LoggerFactory.getLogger(RagClientService.class);
     private static final String DOCUMENTS_PATH = "/api/ext/rag/documents";
+    private static final String API_KEY_HEADER = "X-API-KEY";
     private final RestClient restClient;
-    private final AiProperties aiProperties;
+    private final AiProperties.Rag rag;
 
     public RagClientService(RestClient.Builder restClientBuilder, AiProperties aiProperties) {
-        this.aiProperties = aiProperties;
+        this.rag = requireRagConfig(aiProperties);
         this.restClient = restClientBuilder
-            .requestFactory(() -> buildRequestFactory(aiProperties))
+            .requestFactory(buildRequestFactory(rag))
             .build();
     }
 
@@ -38,13 +39,19 @@ public class RagClientService {
         String endpoint = buildEndpoint();
 
         try {
-            return restClient.post()
+            RagDocumentResponse response = restClient.post()
                 .uri(endpoint)
-                .header("X-API-KEY", aiProperties.getRag().getApiKey())
+                .header(API_KEY_HEADER, requireApiKey(rag))
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
                 .body(RagDocumentResponse.class);
+
+            if (response == null) {
+
+            }
+            return response;
         } catch (RestClientResponseException ex) {
             log.error("RAG call failed. Status={} Body={}", ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
             throw new RagUnavailableException("El proveedor RAG no respondió correctamente.", ex);
@@ -54,6 +61,13 @@ public class RagClientService {
         }
     }
 
+    private AiProperties.Rag requireRagConfig(AiProperties aiProperties) {
+        if (aiProperties == null || aiProperties.getRag() == null) {
+            throw new IllegalStateException("AI RAG no está configurado");
+        }
+        return aiProperties.getRag();
+    }
+
     private void validateRequest(RagDocumentRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("RagDocumentRequest no puede ser null");
@@ -61,10 +75,13 @@ public class RagClientService {
         if (request.content() == null || request.content().isBlank()) {
             throw new IllegalArgumentException("RagDocumentRequest.content es obligatorio");
         }
+        if (request.title() != null && request.title().isBlank()) {
+            throw new IllegalArgumentException("RagDocumentRequest.title no puede ser vacío");
+        }
     }
 
     private String buildEndpoint() {
-        String baseUrl = normalizeBaseUrl(aiProperties.getRag().getBaseUrl());
+        String baseUrl = normalizeBaseUrl(rag.getBaseUrl());
         return baseUrl + DOCUMENTS_PATH;
     }
 
@@ -76,11 +93,21 @@ public class RagClientService {
         return normalized.endsWith("/") ? normalized.substring(0, normalized.length() - 1) : normalized;
     }
 
-    private SimpleClientHttpRequestFactory buildRequestFactory(AiProperties aiProperties) {
+    private SimpleClientHttpRequestFactory buildRequestFactory(AiProperties.Rag rag) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        int timeoutSeconds = aiProperties.getRag().getTimeoutSeconds();
+        int timeoutSeconds = rag.getTimeoutSeconds();
+        if (timeoutSeconds <= 0) {
+            throw new IllegalStateException("AI RAG timeoutSeconds debe ser mayor a 0");
+        }
         factory.setConnectTimeout(Duration.ofSeconds(timeoutSeconds));
         factory.setReadTimeout(Duration.ofSeconds(timeoutSeconds));
         return factory;
+    }
+
+    private String requireApiKey(AiProperties.Rag rag) {
+        if (rag.getApiKey() == null || rag.getApiKey().isBlank()) {
+            throw new IllegalStateException("AI RAG api-key no está configurado");
+        }
+        return rag.getApiKey();
     }
 }

@@ -111,6 +111,24 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     );
 
     /**
+     * Totales por categoría en un rango de fechas usando el nombre de cuenta.
+     */
+    @Query("""
+        select t.category.name, coalesce(sum(t.amount), 0)
+        from Transaction t
+        where lower(t.account.name) = lower(:accountName)
+          and t.category.type = :type
+          and t.transactionDate between :startDate and :endDate
+        group by t.category.name
+        """)
+    List<Object[]> totalsByCategoryAndAccountNameWithinDateRange(
+        @Param("accountName") String accountName,
+        @Param("type") CategoryType type,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate
+    );
+
+    /**
      * Suma de montos por tipo de categoría en un rango de fechas por cuenta.
      */
     @Query("""

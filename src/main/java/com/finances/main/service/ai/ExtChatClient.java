@@ -2,8 +2,9 @@ package com.finances.main.service.ai;
 
 import com.finances.main.web.dto.AiDtos.AiChatRequest;
 import com.finances.main.web.dto.AiDtos.AiChatResponse;
-import org.springframework.http.HttpHeaders;
+import java.time.Duration;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -17,8 +18,9 @@ import org.slf4j.LoggerFactory;
 @Component
 public class ExtChatClient {
     private static final String DEFAULT_MODEL = "fast";
+    private static final String API_KEY_HEADER = "X-API-KEY";
     private final RestClient restClient;
-    private final AiProperties aiProperties;
+    private final AiProperties.Ext ext;
     private final AiChatService fallbackService;
     private static final Logger log = LoggerFactory.getLogger(ExtChatClient.class);
 
@@ -27,9 +29,11 @@ public class ExtChatClient {
         AiChatService fallbackService,
         RestClient.Builder restClientBuilder
     ) {
-        this.aiProperties = aiProperties;
+        this.ext = requireExtConfig(aiProperties);
         this.fallbackService = fallbackService;
-        this.restClient = restClientBuilder.build();
+        this.restClient = restClientBuilder
+            .requestFactory(buildRequestFactory(ext))
+            .build();
     }
 
     /**
@@ -42,9 +46,10 @@ public class ExtChatClient {
 
             AiChatResponse response = restClient
                     .post()
-                    .uri(aiProperties.getExt().getBaseUrl())
-                    .header("X-API-KEY", aiProperties.getExt().getApiKey())
+                    .uri(normalizeBaseUrl(ext.getBaseUrl()))
+                    .header(API_KEY_HEADER, requireApiKey(ext))
                     .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
                     .body(normalizedRequest)
                     .retrieve()
                     .body(AiChatResponse.class);
@@ -55,7 +60,7 @@ public class ExtChatClient {
             }
             return response;
 
-        } catch (org.springframework.web.client.RestClientResponseException ex) {
+        } catch (RestClientResponseException ex) {
             // Esto te da status + body real del error (oro para debug)
             log.error("AI call failed. Status={} Body={}", ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
             return resolveFallbackOrThrow(normalizedRequest, ex);
@@ -101,9 +106,42 @@ public class ExtChatClient {
      * Usa el fallback solo cuando está habilitado; de lo contrario, propaga el fallo.
      */
     private AiChatResponse resolveFallbackOrThrow(AiChatRequest request, Exception cause) {
-        if (aiProperties.getExt().isFallbackEnabled()) {
+        if (ext.isFallbackEnabled()) {
             return fallbackService.generateReply(request);
         }
         throw new ExternalAiUnavailableException("No se pudo obtener respuesta del proveedor de IA.", cause);
+    }
+
+    private AiProperties.Ext requireExtConfig(AiProperties aiProperties) {
+        if (aiProperties == null || aiProperties.getExt() == null) {
+            throw new IllegalStateException("AI EXT no está configurado");
+        }
+        return aiProperties.getExt();
+    }
+
+    private String normalizeBaseUrl(String baseUrl) {
+        if (baseUrl == null || baseUrl.isBlank()) {
+            throw new IllegalStateException("AI EXT base-url no está configurado");
+        }
+        String normalized = baseUrl.trim();
+        return normalized.endsWith("/") ? normalized.substring(0, normalized.length() - 1) : normalized;
+    }
+
+    private SimpleClientHttpRequestFactory buildRequestFactory(AiProperties.Ext ext) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        int timeoutSeconds = ext.getTimeoutSeconds();
+        if (timeoutSeconds <= 0) {
+            throw new IllegalStateException("AI EXT timeoutSeconds debe ser mayor a 0");
+        }
+        factory.setConnectTimeout(Duration.ofSeconds(timeoutSeconds));
+        factory.setReadTimeout(Duration.ofSeconds(timeoutSeconds));
+        return factory;
+    }
+
+    private String requireApiKey(AiProperties.Ext ext) {
+        if (ext.getApiKey() == null || ext.getApiKey().isBlank()) {
+            throw new IllegalStateException("AI EXT api-key no está configurado");
+        }
+        return ext.getApiKey();
     }
 }
