@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
     "ai.ext.base-url=http://localhost:0/api/ext/chat",
+    "ai.ext.fallback-enabled=true",
     "ai.recommendations.enabled=true",
     "ai.recommendations.interval-ms=9999999"
 })
@@ -158,8 +159,8 @@ class AppApiControllerIntegrationTest {
             .andReturn();
 
         JsonNode response = objectMapper.readTree(chatResult.getResponse().getContentAsString());
-        assertThat(response.get("reply").asText()).contains("balance");
-        assertThat(response.get("reply").asText()).contains("totales por categoría");
+        assertThat(response.get("reply").asText()).contains("¿Cómo va el presupuesto?");
+        assertThat(response.get("reply").asText()).contains("Considera estos puntos prácticos");
     }
 
     @Test

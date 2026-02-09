@@ -17,3 +17,4 @@ ai:
     base-url: ${AI_EXT_BASE_URL:http://localhost:8080/api/ext/chat}
     api-key: ${AI_EXT_API_KEY:DBESjxYcFzP6D8_AqIGOp10j8RrRp9JxEHUeEMIXivo}
     timeout-seconds: ${AI_EXT_TIMEOUT:8}
+    fallback-enabled: ${AI_EXT_FALLBACK_ENABLED:false}

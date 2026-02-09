@@ -34,6 +34,7 @@ public class AiProperties {
         private String baseUrl;
         private String apiKey;
         private int timeoutSeconds = 8;
+        private boolean fallbackEnabled = false;
 
         public String getBaseUrl() {
             return baseUrl;
@@ -57,6 +58,14 @@ public class AiProperties {
 
         public void setTimeoutSeconds(int timeoutSeconds) {
             this.timeoutSeconds = timeoutSeconds;
+        }
+
+        public boolean isFallbackEnabled() {
+            return fallbackEnabled;
+        }
+
+        public void setFallbackEnabled(boolean fallbackEnabled) {
+            this.fallbackEnabled = fallbackEnabled;
         }
     }
 

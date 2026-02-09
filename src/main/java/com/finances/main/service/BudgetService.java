@@ -42,8 +42,18 @@ public class BudgetService {
         Account account = accountService.getByName(accountName);
         BigDecimal initialBalance = account.getInitialBalance();
 
-        BigDecimal fixedIncome = sumPlannedMovements(accountName, EnumSet.of(PlannedMovementType.INGRESO_FIJO_NOMINA));
-        BigDecimal fixedExpense = sumPlannedMovements(accountName, EnumSet.of(PlannedMovementType.GASTO_FIJO));
+        BigDecimal fixedIncome = sumPlannedMovements(
+            accountName,
+            EnumSet.of(PlannedMovementType.INGRESO_FIJO_NOMINA),
+            startDate,
+            endDate
+        );
+        BigDecimal fixedExpense = sumPlannedMovements(
+            accountName,
+            EnumSet.of(PlannedMovementType.GASTO_FIJO),
+            startDate,
+            endDate
+        );
 
         BigDecimal actualIncome = transactionRepository.sumByAccountNameAndCategoryTypeWithinDateRange(
             accountName,
@@ -105,15 +115,56 @@ public class BudgetService {
             .toList();
     }
 
-    private BigDecimal sumPlannedMovements(String accountName, EnumSet<PlannedMovementType> types) {
+    private BigDecimal sumPlannedMovements(
+        String accountName,
+        EnumSet<PlannedMovementType> types,
+        LocalDate startDate,
+        LocalDate endDate
+    ) {
         List<PlannedMovement> movements = plannedMovementService.listByAccountNameAndTypes(
             accountName,
             List.copyOf(types)
         );
         return movements.stream()
             .filter(PlannedMovement::isActive)
-            .map(PlannedMovement::getAmount)
+            .map(movement -> movement.getAmount().multiply(
+                BigDecimal.valueOf(countOccurrences(movement.getStartDate(), startDate, endDate, movement.getPeriodicidad()))
+            ))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Cuenta cuántas veces ocurre un movimiento planificado dentro del rango solicitado.
+     */
+    private long countOccurrences(
+        LocalDate movementStart,
+        LocalDate rangeStart,
+        LocalDate rangeEnd,
+        com.finances.main.model.Periodicidad periodicidad
+    ) {
+        if (movementStart == null || rangeStart == null || rangeEnd == null) {
+            return 0;
+        }
+        if (movementStart.isAfter(rangeEnd)) {
+            return 0;
+        }
+
+        int stepMonths = switch (periodicidad) {
+            case BIMESTRAL -> 2;
+            case TRIMESTRAL -> 3;
+            case ANUAL -> 12;
+            default -> 1;
+        };
+
+        long count = 0;
+        LocalDate occurrence = movementStart;
+        while (!occurrence.isAfter(rangeEnd)) {
+            if (!occurrence.isBefore(rangeStart)) {
+                count++;
+            }
+            occurrence = occurrence.plusMonths(stepMonths);
+        }
+        return count;
     }
 
     /**

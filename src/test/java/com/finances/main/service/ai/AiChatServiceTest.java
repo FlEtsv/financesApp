@@ -36,7 +36,7 @@ class AiChatServiceTest {
         AiChatResponse response = chatService.generateReply(request);
 
         assertThat(response.sessionId()).isNotBlank();
-        assertThat(response.reply()).contains("Cuenta principal");
         assertThat(response.reply()).contains("¿Cuál es el balance?");
+        assertThat(response.reply()).contains("Considera estos puntos prácticos");
     }
 }

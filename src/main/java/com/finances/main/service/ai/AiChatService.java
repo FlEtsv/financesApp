@@ -5,8 +5,6 @@ import com.finances.main.web.dto.AiDtos.AiChatResponse;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class AiChatService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AiChatService.class);
     private final AiPromptBuilder promptBuilder;
     private final AiChatRequestNormalizer requestNormalizer;
 
@@ -31,8 +28,7 @@ public class AiChatService {
             .filter(id -> !id.isBlank())
             .orElseGet(() -> UUID.randomUUID().toString());
 
-        String prompt = promptBuilder.buildPrompt(request);
-        logPrompt(prompt);
+        promptBuilder.buildPrompt(request);
         String responseText = buildResponseMessage(request);
 
         return new AiChatResponse(sessionId, responseText, Instant.now());
@@ -44,41 +40,8 @@ public class AiChatService {
         builder.append("Entendido. He recibido tu consulta: \"")
             .append(normalizedMessage)
             .append("\".");
-        appendContextSummary(builder, request);
         appendFinancialGuidance(builder, request);
         return builder.toString();
-    }
-
-    /**
-     * Agrega un resumen del contexto disponible sin exponer valores nulos.
-     */
-    private void appendContextSummary(StringBuilder builder, AiChatRequest request) {
-        if (request.context() == null) {
-            builder.append(" No se recibió contexto adicional para esta sesión.");
-            return;
-        }
-
-        boolean hasAccountName = request.context().accountName() != null && !request.context().accountName().isBlank();
-        boolean hasBalance = request.context().balance() != null;
-        boolean hasTotals = request.context().totalsByCategory() != null && !request.context().totalsByCategory().isEmpty();
-
-        if (hasAccountName || hasBalance || hasTotals) {
-            builder.append(" Contexto disponible:");
-        } else {
-            builder.append(" No se recibió contexto adicional para esta sesión.");
-            return;
-        }
-
-        if (hasAccountName) {
-            builder.append(" cuenta ").append(request.context().accountName()).append(",");
-        }
-        if (hasBalance) {
-            builder.append(" balance ").append(request.context().balance()).append(",");
-        }
-        if (hasTotals) {
-            builder.append(" totales por categoría ").append(request.context().totalsByCategory()).append(",");
-        }
-        builder.deleteCharAt(builder.length() - 1).append(".");
     }
 
     /**
@@ -105,15 +68,4 @@ public class AiChatService {
         }
     }
 
-    /**
-     * Registra el prompt solo cuando se requiere diagnóstico.
-     */
-    private void logPrompt(String prompt) {
-        if (prompt == null || prompt.isBlank()) {
-            return;
-        }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Prompt generado para IA: {}", prompt);
-        }
-    }
 }

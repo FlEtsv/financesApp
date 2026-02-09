@@ -43,11 +43,11 @@ public class ExtChatClient {
                 .retrieve()
                 .body(AiChatResponse.class);
             if (!isValidResponse(response)) {
-                return fallbackService.generateReply(normalizedRequest);
+                return resolveFallbackOrThrow(normalizedRequest, null);
             }
             return response;
         } catch (RestClientException ex) {
-            return fallbackService.generateReply(normalizedRequest);
+            return resolveFallbackOrThrow(normalizedRequest, ex);
         }
     }
 
@@ -70,5 +70,15 @@ public class ExtChatClient {
             model = DEFAULT_MODEL;
         }
         return new AiChatRequest(request.sessionId(), request.message(), model, request.context());
+    }
+
+    /**
+     * Usa el fallback solo cuando está habilitado; de lo contrario, propaga el fallo.
+     */
+    private AiChatResponse resolveFallbackOrThrow(AiChatRequest request, Exception cause) {
+        if (aiProperties.getExt().isFallbackEnabled()) {
+            return fallbackService.generateReply(request);
+        }
+        throw new ExternalAiUnavailableException("No se pudo obtener respuesta del proveedor de IA.", cause);
     }
 }
