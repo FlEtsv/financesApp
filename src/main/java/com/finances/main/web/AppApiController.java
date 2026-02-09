@@ -60,6 +60,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+
 /**
  * Endpoints /app/api para consumo de la interfaz web básica.
  */
@@ -472,6 +473,15 @@ public class AppApiController {
                 snapshot.context()
             )))
             .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    @PostMapping("/ai/rag")
+    public ResponseEntity<?> uploadRag(@RequestBody RagDocumentRequest request) {
+        if (request == null || request.content() == null || request.content().isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        var response = ragClient.sendDocument(request);
+        return ResponseEntity.ok(response);
     }
 
 

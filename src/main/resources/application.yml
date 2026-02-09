@@ -1,4 +1,8 @@
 ai:
+  rag:
+    base-url: ${AI_RAG_BASE_URL:http://localhost:8080}
+    api-key: ${AI_RAG_API_KEY:<YOUR_RAG_API_KEY>}
+    timeout-seconds: ${AI_RAG_TIMEOUT:8}
   system-prompt: >
     Eres el asistente financiero de Finances App. Esta conversación sirve para analizar
     movimientos, balances y gastos/ingresos planificados de una cuenta. Responde en español,

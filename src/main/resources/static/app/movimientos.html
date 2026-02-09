@@ -8,14 +8,18 @@
     :root {
       color-scheme: light;
       font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-      --primary: #1f3a8a;
-      --primary-soft: #e0e7ff;
-      --bg: #f3f5f9;
+      --primary: #1e3a8a;
+      --primary-strong: #0f2d72;
+      --primary-soft: #e7edff;
+      --bg: #f6f8fc;
       --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --success: #16a34a;
+      --text: #0b1220;
+      --muted: #5b6b83;
+      --border: #e5ebf4;
+      --success: #0f9d58;
+      --shadow: 0 10px 28px rgba(12, 32, 74, 0.08);
+      --radius-lg: 18px;
+      --radius-md: 12px;
     }
 
     * {
@@ -26,43 +30,102 @@
       margin: 0;
       background: var(--bg);
       color: var(--text);
+      letter-spacing: 0.1px;
+    }
+
+    .app-shell {
+      min-height: 100vh;
     }
 
     header {
-      background: linear-gradient(135deg, #1e3a8a, #2563eb);
-      color: #fff;
-      padding: 28px 36px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+    }
+
+    .topbar {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 28px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 16px;
     }
 
-    header .actions {
+    .brand {
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
+      align-items: center;
+      gap: 14px;
     }
 
-    .subtitle {
-      margin: 4px 0 0;
-      font-size: 14px;
-      color: #dbeafe;
+    .brand-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #1e3a8a, #3b82f6);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 10px 18px rgba(30, 58, 138, 0.3);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    header .subtitle {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    header a {
+      text-decoration: none;
+      color: inherit;
     }
 
     .nav-link {
-      padding: 10px 16px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: transparent;
+      color: #0f172a;
       font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      text-decoration: none;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      background: #f1f5ff;
+      border-color: #dfe7ff;
+      color: var(--primary);
+    }
+
+    .nav-link.active {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-color: #d6e0ff;
     }
 
     main {
-      padding: 32px 36px 48px;
-      max-width: 1200px;
+      padding: 28px;
+      max-width: 1280px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -71,9 +134,9 @@
 
     .card {
       background: var(--card);
-      border-radius: 18px;
+      border-radius: var(--radius-lg);
       padding: 20px 22px;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      box-shadow: var(--shadow);
       border: 1px solid var(--border);
     }
 
@@ -85,10 +148,12 @@
 
     label {
       display: block;
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
       margin-bottom: 6px;
       color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
 
     input,
@@ -96,29 +161,40 @@
     textarea {
       width: 100%;
       padding: 10px 12px;
-      border-radius: 10px;
+      border-radius: var(--radius-md);
       border: 1px solid var(--border);
       font-size: 14px;
       font-family: inherit;
+      background: #fff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #c7d7ff;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+      outline: none;
     }
 
     button.primary {
       background: var(--primary);
       color: #fff;
       border: none;
-      border-radius: 10px;
+      border-radius: var(--radius-md);
       padding: 10px 16px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
+      box-shadow: 0 10px 20px rgba(30, 58, 138, 0.22);
     }
 
     button.danger {
       background: #dc2626;
       color: #fff;
       border: none;
-      border-radius: 10px;
+      border-radius: var(--radius-md);
       padding: 8px 12px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
     }
 
@@ -143,10 +219,10 @@
 
     th {
       color: var(--muted);
-      font-weight: 600;
-      font-size: 12px;
+      font-weight: 700;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
     }
 
     .status {
@@ -156,8 +232,8 @@
       padding: 4px 10px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 600;
-      background: #dcfce7;
+      font-weight: 700;
+      background: #e9f7ef;
       color: var(--success);
     }
 
@@ -172,19 +248,27 @@
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Ingresos y gastos</h1>
-      <p class="subtitle">Registra movimientos reales y confirma pagos.</p>
-    </div>
-    <div class="actions">
-      <a class="nav-link" href="/app/index.html">Dashboard</a>
-      <a class="nav-link" href="/app/objetivos.html">Objetivos financieros</a>
-      <a class="nav-link" href="/app/fijos.html">Gastos/ingresos fijos</a>
-    </div>
-  </header>
+  <div class="app-shell">
+    <header>
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-badge">FA</div>
+          <div>
+            <h1>Ingresos y gastos</h1>
+            <p class="subtitle">Registra movimientos reales y confirma pagos.</p>
+          </div>
+        </div>
 
-  <main>
+        <nav class="nav">
+          <a class="nav-link" href="/app/index.html">Dashboard</a>
+          <a class="nav-link active" href="/app/movimientos.html">Ingresos y gastos</a>
+          <a class="nav-link" href="/app/objetivos.html">Objetivos financieros</a>
+          <a class="nav-link" href="/app/fijos.html">Gastos/ingresos fijos</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
     <section class="card">
       <h2>Nuevo movimiento</h2>
       <p class="muted">Utiliza esta sección para confirmar ingresos y gastos reales.</p>
