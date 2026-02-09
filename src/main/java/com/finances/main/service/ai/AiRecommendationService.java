@@ -77,7 +77,7 @@ public class AiRecommendationService {
 
     private void generateAndStoreRecommendation(String accountName) {
         AiContextResponse context = buildContext(accountName);
-        AiChatRequest request = new AiChatRequest(null, resolvePrompt(), context);
+        AiChatRequest request = new AiChatRequest(null, resolvePrompt(), "fast", context);
         AiChatResponse response = extChatClient.sendChat(request);
         latestRecommendations.put(accountName, new AiRecommendationSnapshot(accountName, context, response.reply(), response.respondedAt()));
     }

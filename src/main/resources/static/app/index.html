@@ -638,7 +638,9 @@
     const accountInitialBalanceSelect =
             document.getElementById('accountNameInitialBalance');
 
-    let chatSessionId = '';
+    // Mantiene la sesión de chat para conservar contexto entre recargas.
+    const CHAT_SESSION_STORAGE_KEY = 'finances.chat.sessionId';
+    let chatSessionId = localStorage.getItem(CHAT_SESSION_STORAGE_KEY) || '';
     let recommendationsTimerId = null;
 
     const today = new Date().toISOString().slice(0, 10);
@@ -1080,7 +1082,12 @@
         const response = await fetch('/app/api/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: chatSessionId, message, context })
+          body: JSON.stringify({
+            sessionId: chatSessionId,
+            mensaje: message,
+            model: 'fast',
+            context
+          })
         });
 
         if (!response.ok) {
@@ -1088,7 +1095,10 @@
         }
 
         const data = await response.json();
-        chatSessionId = data.sessionId || chatSessionId;
+        if (data.sessionId) {
+          chatSessionId = data.sessionId;
+          localStorage.setItem(CHAT_SESSION_STORAGE_KEY, data.sessionId);
+        }
         appendChatMessage({ sender: 'ai', message: data.reply || 'Respuesta pendiente.' });
       } catch (error) {
         appendChatMessage({ sender: 'ai', message: 'En espera de integración con el endpoint de IA.' });

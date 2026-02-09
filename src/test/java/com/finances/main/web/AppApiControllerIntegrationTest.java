@@ -142,7 +142,7 @@ class AppApiControllerIntegrationTest {
 
         String chatPayload = String.format(
             """
-                {"sessionId":"","message":"¿Cómo va el presupuesto?",
+                {"sessionId":"","mensaje":"¿Cómo va el presupuesto?","model":"fast",
                  "context":{"accountName":"Cuenta IA","startDate":"%s","endDate":"%s",
                  "categoryType":"GASTO","balance":null,"totalsByCategory":null,
                  "recentTransactions":[],"plannedMovements":[]}}

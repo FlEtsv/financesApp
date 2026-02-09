@@ -33,7 +33,7 @@ public class ExtChatController {
     @PostMapping("/chat")
     @ResponseStatus(HttpStatus.OK)
     public AiChatResponse chat(
-        @RequestHeader(name = "X-API-KEY", required = false) String apiKey,
+        @RequestHeader(name = "ex-api-key", required = false) String apiKey,
         @RequestBody AiChatRequest request
     ) {
         if (apiKey == null || !apiKey.equals(aiProperties.getExt().getApiKey())) {

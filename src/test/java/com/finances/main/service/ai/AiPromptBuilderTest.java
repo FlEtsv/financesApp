@@ -30,7 +30,7 @@ class AiPromptBuilderTest {
             List.of()
         );
 
-        AiChatRequest request = new AiChatRequest(null, "   ", context);
+        AiChatRequest request = new AiChatRequest(null, "   ", "fast", context);
         String prompt = promptBuilder.buildPrompt(request);
 
         assertThat(prompt).contains("Prompt del sistema");

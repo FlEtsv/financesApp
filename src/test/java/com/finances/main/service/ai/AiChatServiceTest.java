@@ -32,7 +32,7 @@ class AiChatServiceTest {
             List.of()
         );
 
-        AiChatRequest request = new AiChatRequest("", "¿Cuál es el balance?", context);
+        AiChatRequest request = new AiChatRequest("", "¿Cuál es el balance?", "fast", context);
         AiChatResponse response = chatService.generateReply(request);
 
         assertThat(response.sessionId()).isNotBlank();

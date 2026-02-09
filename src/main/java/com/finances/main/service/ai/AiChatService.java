@@ -45,6 +45,7 @@ public class AiChatService {
             .append(normalizedMessage)
             .append("\".");
         appendContextSummary(builder, request);
+        appendFinancialGuidance(builder, request);
         return builder.toString();
     }
 
@@ -78,6 +79,30 @@ public class AiChatService {
             builder.append(" totales por categoría ").append(request.context().totalsByCategory()).append(",");
         }
         builder.deleteCharAt(builder.length() - 1).append(".");
+    }
+
+    /**
+     * Añade orientación financiera para usuarios individuales y empresas.
+     */
+    private void appendFinancialGuidance(StringBuilder builder, AiChatRequest request) {
+        builder.append(" Considera estos puntos prácticos:");
+        builder.append(" si eres usuario, prioriza un fondo de emergencia, evita sobreendeudarte")
+            .append(" y revisa tus gastos variables.");
+        builder.append(" si gestionas una empresa, monitorea el flujo de caja, la liquidez")
+            .append(" y las obligaciones recurrentes (nómina, impuestos, proveedores).");
+
+        if (request.context() == null || request.context().balance() == null) {
+            builder.append(" Comparte balance y periodos para afinar recomendaciones.");
+            return;
+        }
+
+        if (request.context().balance().signum() < 0) {
+            builder.append(" El balance negativo sugiere priorizar recortes de gasto")
+                .append(" y revisar ingresos planificados.");
+        } else {
+            builder.append(" El balance positivo permite planificar inversión o ahorro")
+                .append(" según tus objetivos.");
+        }
     }
 
     /**

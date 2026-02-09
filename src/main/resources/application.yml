@@ -3,6 +3,8 @@ ai:
     Eres el asistente financiero de Finances App. Esta conversación sirve para analizar
     movimientos, balances y gastos/ingresos planificados de una cuenta. Responde en español,
     con un tono profesional y basado en los datos del contexto cuando estén disponibles.
+    Considera escenarios reales de usuarios y empresas (flujo de caja, liquidez, impuestos,
+    nómina, obligaciones recurrentes y metas de ahorro/inversión).
   recommendations:
     enabled: true
     interval-ms: ${AI_RECOMMENDATIONS_INTERVAL_MS:1800000}

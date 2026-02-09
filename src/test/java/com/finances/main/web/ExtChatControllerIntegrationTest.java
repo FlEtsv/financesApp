@@ -31,7 +31,7 @@ class ExtChatControllerIntegrationTest {
     @Test
     void rejectsRequestsWithInvalidApiKey() throws Exception {
         String payload = """
-            {"sessionId":"","message":"Hola","context":null}
+            {"sessionId":"","mensaje":"Hola","model":"fast","context":null}
             """;
 
         mockMvc.perform(post("/api/ext/chat")
@@ -43,11 +43,11 @@ class ExtChatControllerIntegrationTest {
     @Test
     void returnsNormalizedReplyWhenApiKeyIsValid() throws Exception {
         String payload = """
-            {"sessionId":"","message":"Necesito ayuda","context":null}
+            {"sessionId":"","mensaje":"Necesito ayuda","model":"fast","context":null}
             """;
 
         MvcResult result = mockMvc.perform(post("/api/ext/chat")
-                .header("X-API-KEY", "test-key")
+                .header("ex-api-key", "test-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload))
             .andExpect(status().isOk())
