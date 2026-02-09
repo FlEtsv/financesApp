@@ -43,6 +43,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +66,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/app/api")
 public class AppApiController {
+    private static final Logger log = LoggerFactory.getLogger(AppApiController.class);
     private final LedgerService ledgerService;
     private final AccountService accountService;
     private final PlannedMovementService plannedMovementService;
@@ -440,6 +444,7 @@ public class AppApiController {
      */
     @PostMapping("/ai/chat")
     public AiChatResponse chatWithAi(@RequestBody AiChatRequest request) {
+        log.debug("request.message = {} request.context{}", request.message(), request.context());
         AiChatRequest enrichedRequest = aiContextService.enrichChatRequest(request);
         try {
             return extChatClient.sendChat(enrichedRequest);

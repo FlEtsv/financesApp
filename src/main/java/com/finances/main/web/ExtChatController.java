@@ -33,12 +33,33 @@ public class ExtChatController {
     @PostMapping("/chat")
     @ResponseStatus(HttpStatus.OK)
     public AiChatResponse chat(
-        @RequestHeader(name = "ex-api-key", required = false) String apiKey,
-        @RequestBody AiChatRequest request
+
+        @RequestHeader(name = "x-api-key", required = false) String apiKey,
+        @RequestBody(required = false) AiChatRequest request
     ) {
-        if (apiKey == null || !apiKey.equals(aiProperties.getExt().getApiKey())) {
+        if (aiProperties.getExt() == null || aiProperties.getExt().getApiKey() == null
+            || aiProperties.getExt().getApiKey().isBlank()) {
+            throw new ResponseStatusException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Configuración de IA externa incompleta (ext.apiKey)."
+            );
+        }
+
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Falta x-api-key.");
+        }
+
+        String normalizedApiKey = apiKey.trim();
+        String expectedApiKey = aiProperties.getExt().getApiKey().trim();
+
+        if (!normalizedApiKey.equals(expectedApiKey)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "API key inválida.");
         }
+
+        if (request == null || request.message() == null || request.message().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El campo 'message' es obligatorio.");
+        }
+
         return aiChatService.generateReply(request);
     }
 }

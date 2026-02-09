@@ -14,7 +14,13 @@ ai:
       Analiza el contexto financiero reciente, sugiere movimientos o ajustes y comparte
       una opinión general sobre la salud financiera de la cuenta.
   ext:
-    base-url: ${AI_EXT_BASE_URL:http://localhost:8080/api/ext/chat}
-    api-key: ${AI_EXT_API_KEY:DBESjxYcFzP6D8_AqIGOp10j8RrRp9JxEHUeEMIXivo}
-    timeout-seconds: ${AI_EXT_TIMEOUT:8}
+    base-url: ${AI_EXT_BASE_URL:http://192.168.18.53:8080/api/ext/chat}
+    api-key: ${AI_EXT_API_KEY:r44IGMKxeD9vkD1n2yhmURaAGohGobcFMWjI0YLNVRY}
+    timeout-seconds: ${AI_EXT_TIMEOUT:50}
     fallback-enabled: ${AI_EXT_FALLBACK_ENABLED:false}
+logging:
+  level:
+    root: INFO
+    com.tu.paquete: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{correlationId}] %logger{36} - %msg%n"

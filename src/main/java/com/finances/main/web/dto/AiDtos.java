@@ -61,7 +61,7 @@ public final class AiDtos {
      */
     public record AiChatRequest(
         String sessionId,
-        @JsonProperty("mensaje") @JsonAlias("message") String message,
+        @JsonProperty("message") @JsonAlias({ "message", "mensaje" }) String message,
         String model,
         AiContextResponse context
     ) {

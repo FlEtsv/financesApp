@@ -1084,13 +1084,15 @@
       try {
         const context = await buildAiContext();
 
-        // TODO: reemplazar por endpoint real de IA.
-        const response = await fetch('/app/api/ai/chat', {
+        const response = await fetch('/api/chat', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': '<YOUR_EXT_API_KEY>'
+          },
           body: JSON.stringify({
             sessionId: chatSessionId,
-            mensaje: message,
+            message: message,
             model: 'fast',
             context
           })
