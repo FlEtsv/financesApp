@@ -1,4 +1,4 @@
-# SQL para crear la base de datos
+﻿# SQL para crear la base de datos
 
 Usa este script para crear la base de datos y el usuario por defecto.
 
@@ -12,4 +12,4 @@ GRANT ALL PRIVILEGES ON finances_db.* TO 'finances'@'%';
 FLUSH PRIVILEGES;
 ```
 
-También puedes ejecutar el archivo [`docs/DB.sql`](DB.sql).
+Tambien puedes ejecutar el archivo `docs/DB.sql`.

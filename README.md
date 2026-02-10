@@ -1,35 +1,57 @@
-# Finances App
+﻿# Finances App
 
-Aplicación Spring Boot para gestionar un libro mayor con endpoints REST y una interfaz web básica. El desarrollo sigue principios SOLID y una estructura modular para facilitar la evolución en ciclos AGILE.
+Finances App es una aplicacion de gestion financiera basada en Spring Boot. Permite registrar ingresos y gastos, planificar movimientos recurrentes, administrar objetivos y visualizar un dashboard con indicadores. Incluye un frontend web estatico y servicios de IA para analisis contextual.
 
-## Estructura rápida
-- `src/main/java/com/finances/main/web`: controladores y DTOs web.
-- `src/main/resources/static/app`: interfaz web básica (HTML/JS).
-- `docs/`: documentación operativa (API, Docker y base de datos).
+## Caracteristicas principales
+- Libro mayor con cuentas, transacciones y saldos.
+- Movimientos planificados: gastos fijos e ingresos recurrentes.
+- Presupuestos por periodo y resumen mensual.
+- Objetivos financieros con seguimiento y progreso.
+- Dashboard con metricas, alertas y top categorias.
+- Asistente de IA con contexto financiero y RAG opcional.
 
-## Endpoints principales
-- **UI**: `GET /app` (interfaz web básica).
-- **API web**: `GET /app/api/accounts/{id}/balance`
-- **API web**: `GET /app/api/accounts/{id}/totals?type=INCOME|EXPENSE`
-- **API web**: `GET /app/api/accounts/{id}/transactions?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD`
-- **API ledger**: `GET /api/ledger/...` (endpoints originales).
+## Stack tecnico
+- Java 21, Spring Boot, Spring Data JPA.
+- MySQL en runtime, H2 en tests.
+- UI estatica en `src/main/resources/static/app`.
 
-Consulta más detalles en [docs/API.md](docs/API.md).
+## Requisitos
+- JDK 21.
+- MySQL 8+ (o Docker).
+- Gradle wrapper incluido.
 
-## Base de datos
-Consulta el script SQL en [docs/DB.md](docs/DB.md).
+## Configuracion rapida
+Las variables se definen en `src/main/resources/application.yml` y se pueden sobrescribir por entorno.
 
-## Ejecución local
+Variables clave:
+- `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DDL_AUTO`.
+- `AI_EXT_BASE_URL`, `AI_EXT_API_KEY`, `AI_EXT_TIMEOUT`, `AI_EXT_FALLBACK_ENABLED`.
+- `AI_RAG_BASE_URL`, `AI_RAG_API_KEY`, `AI_RAG_TIMEOUT`.
+- `AI_RECOMMENDATIONS_INTERVAL_MS`, `AI_RECOMMENDATIONS_LOOKBACK_DAYS`, `AI_RECOMMENDATIONS_CATEGORY_TYPE`.
+
+Detalle completo en `docs/CONFIGURATION.md` y `docs/AI.md`.
+
+## Ejecucion local
 ```bash
 ./gradlew bootRun
 ```
 
-Variables de entorno recomendadas:
-- `DB_URL` (por ejemplo `jdbc:mysql://localhost:3306/finances_db`)
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `DB_DDL_AUTO` (`update`, `validate`, etc.)
+- UI: `http://localhost:8080/app`
+- API: `http://localhost:8080/app/api`
 
-Diseñado para el uso de la IA como coaching se sonecta a FlEtsv/apiasistente
+## Pruebas
+```bash
+./gradlew test
+```
+
 ## Docker
-Consulta la guía de despliegue en [docs/DOCKER.md](docs/DOCKER.md).
+```bash
+docker compose up --build
+```
+
+## Documentacion
+- `docs/API.md`
+- `docs/DB.md`
+- `docs/DOCKER.md`
+- `docs/CONFIGURATION.md`
+- `docs/AI.md`
